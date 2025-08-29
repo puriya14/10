@@ -1,537 +1,619 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HIZLI ON NUMARA • By_Puri</title>
-  <meta name="theme-color" content="#0f172a" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <style>
-    :root{
-      --bg:#0b1021; --card:#121936; --ink:#e5ecff; --muted:#93a4d1;
-      --accent:#5eead4; --accent2:#a78bfa; --hot:#ef4444; --cold:#22d3ee;
-      --ok:#10b981; --warn:#f59e0b;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
-    a{color:var(--accent)}
-    header{
-      position:sticky; top:0; z-index:50; backdrop-filter:saturate(180%) blur(8px);
-      background:linear-gradient(180deg,rgba(11,16,33,.9),rgba(11,16,33,.6));
-      border-bottom:1px solid #1e293b66; padding:10px 14px; display:flex; align-items:center; gap:12px
-    }
-    .logo{font-weight:800; letter-spacing:.4px}
-    .pill{padding:4px 8px; border:1px solid #33415588; border-radius:999px; color:var(--muted)}
-    .wrap{display:flex; min-height:calc(100dvh - 56px)}
-    /* Drawer */
-    nav{
-      width:280px; background:var(--card); border-right:1px solid #1e293b66; padding:14px; position:relative;
-    }
-    #drawerToggle{display:none}
-    .drawer-btn{display:none}
-    @media (max-width:900px){
-      nav{position:fixed; inset:0 auto 0 -280px; transition:transform .25s ease; transform:translateX(0)}
-      #drawerToggle:checked ~ .wrap nav{transform:translateX(280px)}
-      .backdrop{display:none}
-      #drawerToggle:checked ~ .wrap .backdrop{display:block; position:fixed; inset:56px 0 0 0; background:#0008; z-index:30}
-      .drawer-btn{display:inline-flex; border:1px solid #33415588; border-radius:10px; padding:6px 10px; color:var(--muted); background:#0b1021}
-    }
-    nav h3{margin:8px 0 6px; font-size:12px; color:var(--muted); letter-spacing:.3px; text-transform:uppercase}
-    .menu a{display:block; padding:10px 10px; border-radius:10px; color:var(--ink); text-decoration:none; margin-bottom:6px; border:1px solid #33415533}
-    .menu a:hover{background:#0b122d; border-color:#47556966}
-    main{flex:1; padding:18px; max-width:1200px; margin:0 auto}
-    .grid{display:grid; gap:14px; grid-template-columns:repeat(12,1fr)}
-    .col-12{grid-column:span 12}
-    .col-6{grid-column:span 6}
-    .col-4{grid-column:span 4}
-    .col-3{grid-column:span 3}
-    @media (max-width:1000px){ .col-6,.col-4,.col-3{grid-column:span 12} }
-    .card{background:var(--card); border:1px solid #33415566; border-radius:14px; padding:14px}
-    .card h2{margin:0 0 8px}
-    .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .btn{appearance:none; border:1px solid #33415588; background:#0f172a; color:#e5ecff; padding:10px 12px; border-radius:10px; cursor:pointer}
-    .btn:hover{border-color:#64748b}
-    .btn.primary{background:linear-gradient(135deg,#0ea5e9,#6366f1); border-color:transparent}
-    .btn.success{background:linear-gradient(135deg,#22c55e,#06b6d4); border-color:transparent}
-    .tag{font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid #33415566; color:var(--muted)}
-    .num{
-      width:34px;height:34px; display:inline-grid; place-items:center; border-radius:999px; margin:2px;
-      background:#0b122d; border:1px solid #334155aa; font-weight:700; color:#e5ecff;
-    }
-    .num.hot{border-color:#ef4444; box-shadow:0 0 0 1px #ef4444 inset}
-    .num.cold{border-color:#22d3ee; box-shadow:0 0 0 1px #22d3ee inset}
-    .ticket{display:flex; flex-wrap:wrap; gap:4px; align-items:center; background:#0b122a; border:1px dashed #33415588; border-radius:12px; padding:8px}
-    .muted{color:var(--muted)}
-    .chips label{display:inline-flex; gap:6px; align-items:center; border:1px solid #33415566; padding:6px 8px; border-radius:10px; margin:3px 6px 3px 0; cursor:pointer}
-    .chips input{accent-color:#22d3ee}
-    .info{display:inline-grid; place-items:center; width:18px; height:18px; border-radius:999px; border:1px solid #64748b; color:#a3b3da; font-size:12px}
-    .kbd{background:#0b122a; border:1px solid #33415588; padding:2px 6px; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace}
-    .pill.hot::before{content:"🔥 ";} .pill.cold::before{content:"❄️ ";}
-    footer{color:#93a4d1; padding:24px 8px; text-align:center}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HIZLI ON NUMARA • By_Puri</title>
+<meta name="theme-color" content="#0e1327">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#0b1020; --card:#11173a; --mut:#8ea1c7; --line:#223057; --acc:#60a5fa; --ok:#22c55e; --bad:#ef4444;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#0b1020,#0b1020 60%,#0a0f1f);color:#dbe5ff;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  a{color:#9dc1ff;text-decoration:none} a:hover{text-decoration:underline}
+  /* Layout */
+  .shell{display:grid;grid-template-columns:260px 1fr;min-height:100%}
+  nav{background:#0e1430;border-right:1px solid var(--line);position:sticky;top:0;height:100vh}
+  .brand{display:flex;gap:10px;align-items:center;padding:14px 14px;border-bottom:1px solid var(--line)}
+  .logo{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-weight:800;background:#1d2570}
+  .nav{padding:10px}
+  .nav button{width:100%;text-align:left;background:transparent;border:1px solid transparent;color:#bdd1ff;padding:10px 12px;border-radius:10px;margin:3px 0;font-weight:600;cursor:pointer}
+  .nav button.active,.nav button:hover{background:#121a44;border-color:#2c3a78}
+  .foot{position:absolute;bottom:8px;left:0;right:0;padding:8px 12px;color:#9fb2dd;font-size:12px;opacity:.8}
+  header{position:sticky;top:0;z-index:5;background:rgba(11,16,32,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:10px;max-width:1200px;margin:auto;padding:12px 14px}
+  .wrap{max-width:1200px;margin:auto;padding:16px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1.3fr .7fr}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #2a3660;background:#0f1733}
+  input[type=text],input[type=number]{background:#0f1733;color:#e5edff;border:1px solid #2b3764;border-radius:10px;padding:12px 12px;font-size:15px;outline:none;min-width:260px}
+  button{background:#192446;border:1px solid #2a3662;color:#e1ebff;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;transition:.15s}
+  button:hover{transform:translateY(-1px);border-color:#7aa7ff}
+  .primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border-color:#3b82f6}
+  .muted{color:var(--mut)}
+  .hr{height:1px;background:var(--line);margin:10px 0}
+  .num{width:36px;height:36px;border-radius:999px;background:#0d1533;border:1px solid #2b3662;display:inline-grid;place-items:center;margin:3px;font-weight:800}
+  .hot{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.25) inset}
+  .cold{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.25) inset}
+  .tickets{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+  .ticket{background:#0f1733;border:1px dashed #2b3662;border-radius:12px;padding:10px}
+  .tag{font-size:12px;color:#93a1c8}
+  .warn{color:#f59e0b}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  /* Wheel */
+  .wheel{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .slot{height:44px;border:1px solid #2c3a78;border-radius:10px;display:grid;place-items:center;background:#0f1733;font-size:18px;font-weight:800}
+  .spin{animation:spin 1s cubic-bezier(.2,.6,.3,1) infinite}
+  @keyframes spin{0%{filter:blur(0)}50%{filter:blur(2px)}100%{filter:blur(0)}}
+  /* Drawer mobile */
+  .burger{display:none}
+  @media(max-width:980px){
+    .shell{grid-template-columns:1fr}
+    nav{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:.2s;max-width:88%;width:320px}
+    nav.open{transform:none}
+    .burger{display:inline-flex}
+    .wrap{padding:14px}
+  }
+</style>
 </head>
 <body>
-  <header>
-    <label class="drawer-btn" for="drawerToggle">☰ Menü</label>
-    <div class="logo">HIZLI ON NUMARA • <span class="pill">By_Puri</span></div>
-    <div class="pill cold" style="margin-left:auto">Üst bant çıpası açık</div>
-  </header>
-
-  <input type="checkbox" id="drawerToggle" />
-  <div class="wrap">
-    <nav>
-      <h3>Menü</h3>
-      <div class="menu">
-        <a href="#uret">🎯 Bilet Üret</a>
-        <a href="#agirlik">⚙️ Ağırlıklar (Profesör Modu)</a>
-        <a href="#gecmis">📝 Çekiliş Girişi / Geçmiş</a>
-        <a href="#istat">📈 Anlık Sıcaklar</a>
+<div class="shell">
+  <nav id="drawer">
+    <div class="brand">
+      <div class="logo">P</div>
+      <div>
+        <div style="font-weight:900;letter-spacing:.3px">HIZLI ON NUMARA</div>
+        <div class="muted" style="font-size:12px">By_Puri • Pro</div>
       </div>
-      <h3>Not</h3>
-      <div class="muted" style="font-size:12px">
-        Bu araç şans oyununu yenme garantisi vermez. Kurallar: üst bant çıpası,
-        komşu göçü, ayna eşleri, merdiven ve tek/çift dengesini kullanır.
+    </div>
+    <div class="nav">
+      <button data-tab="home" class="active">🏠 Giriş & Üret</button>
+      <button data-tab="momentum">📈 Momentum</button>
+      <button data-tab="cluster">🧩 Cluster 2/3/4/5</button>
+      <button data-tab="surprise">🎯 Sürpriz İndeksi</button>
+      <button data-tab="settings">⚙️ Ayarlar & Cloud</button>
+    </div>
+    <div class="foot">© Puri • eğitim/analiz amaçlı; şans oyunlarında garanti yoktur.</div>
+  </nav>
+
+  <main>
+    <header>
+      <div class="bar">
+        <button class="burger" id="btnBurger">☰ Menü</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800">HIZLI ON NUMARA • By_Puri</div>
+          <div class="muted" style="font-size:12px">Akıllı ağırlıklandırma + kısıtlı üretim motoru</div>
+        </div>
+        <label class="pill" title="Supabase ile bulut eşitleme">
+          <input id="cloudToggle" type="checkbox"> Cloud Sync
+        </label>
       </div>
-    </nav>
-    <div class="backdrop"></div>
+    </header>
 
-    <main>
-      <div class="grid">
-
-        <!-- ÜRETİM -->
-        <section id="uret" class="col-12 card">
-          <h2>🎯 Tek Tık 5 Bilet</h2>
-          <div class="muted" style="margin-bottom:8px">
-            Her buton, seçilen çekirdek kombin (2/3/4/5’li) ile <b>5 adet</b> 10 sayılık bilet üretir.
-            Üretim kuralları: Üst bant (73–79) en az 2 sayı, komşu/ayna/merdiven puanı,
-            band dağılımı ve tek/çift eğilimi.
-          </div>
-          <div class="row" style="margin-bottom:10px">
-            <button class="btn primary" id="gen2">2’li x5</button>
-            <button class="btn primary" id="gen3">3’lü x5</button>
-            <button class="btn primary" id="gen4">4’lü x5</button>
-            <button class="btn primary" id="gen5">5’li x5</button>
-            <button class="btn" id="clearTickets">Temizle</button>
-          </div>
-          <div id="ticketsArea" class="grid"></div>
-        </section>
-
-        <!-- AĞIRLIKLAR -->
-        <section id="agirlik" class="col-12 card">
-          <h2>⚙️ Ağırlıklar (Profesör Modu)</h2>
-          <div class="chips">
-            <label title="73–79 aralığından en az 2 sayı zorunluluğu ve ekstra puan.">
-              <input type="checkbox" id="wAnchor" checked/> Üst bant çıpası <span class="info">i</span>
-            </label>
-            <label title="Son 1–3 çekilişte çıkan sayılar için ±1/±2 komşulara puan.">
-              <input type="checkbox" id="wNeighbors" checked/> Komşu göçü (±1/±2) <span class="info">i</span>
-            </label>
-            <label title="n ile n+40 (ör. 33–73, 24–64) eşlerine küçük bonus.">
-              <input type="checkbox" id="wMirror40" checked/> 40-fark ayna <span class="info">i</span>
-            </label>
-            <label title="Bilette en az bir bitişik çift/üçlü merdiven.">
-              <input type="checkbox" id="wLadder" checked/> Merdiven şartı <span class="info">i</span>
-            </label>
-            <label title="10 sayılık bilette tek sayılar 6/4 veya 7/3 gibi az farkla fazla.">
-              <input type="checkbox" id="wOddTilt" checked/> Tek/çift hafif tek lehine <span class="info">i</span>
-            </label>
-            <label title="Sıcak çekirdek havuz: 11,13,15,17,23–26,31–34,47,50,53,56,59,61,63,67,71,73–75,77,79.">
-              <input type="checkbox" id="wHotCore" checked/> Sıcak çekirdek havuz <span class="info">i</span>
-            </label>
-          </div>
-          <div class="muted" style="margin-top:8px">
-            Kısayol: <span class="kbd">G</span> (son çekilişi kaydet), <span class="kbd">2/3/4/5</span> (tek tık üretimler), <span class="kbd">T</span> (temizle)
-          </div>
-        </section>
-
-        <!-- GEÇMİŞ GİRİŞ -->
-        <section id="gecmis" class="col-12 card">
-          <h2>📝 Çekiliş Girişi & Geçmiş</h2>
-          <div class="row" style="margin-bottom:8px">
-            <input id="drawInput" class="btn" style="flex:1; text-align:left" placeholder="Örn: 1,3,7,11,15,24,33,47,56,63,74,77,79 (boşluk veya virgül fark etmez)" />
-            <button class="btn success" id="saveDraw">Kaydet</button>
-            <button class="btn" id="clearHistory">Geçmişi Sil</button>
-          </div>
-          <div class="muted">Kaydettiğin çekilişler cihazında saklanır (localStorage). İstersen Supabase’i açabilirsin (aşağıya bak).</div>
-          <div id="historyArea" style="margin-top:12px"></div>
-        </section>
-
-        <!-- İSTATİSTİK: Sıcaklar -->
-        <section id="istat" class="col-12 card">
-          <h2>📈 Anlık Sıcaklar (Ağırlık skoru ilk 20)</h2>
-          <div id="hotNow"></div>
-        </section>
-
-        <!-- (Opsiyonel) Supabase kancası -->
-        <section class="col-12 card">
-          <h2>🌐 (Opsiyonel) Supabase</h2>
-          <div class="muted">
-            Projenden okuma/yazma yapmak istersen aşağıdaki alanlara kimlik bilgilerini girip <b>Etkinleştir</b> de.
-            Boş bırakılırsa uygulama yalnızca localStorage kullanır.
-          </div>
-          <div class="row" style="margin-top:8px">
-            <input id="sbUrl" class="btn" style="flex:1" placeholder="Supabase URL (https://xxxx.supabase.co)" />
-            <input id="sbKey" class="btn" style="flex:1" placeholder="Anon Public Key" />
-            <button id="sbEnable" class="btn">Etkinleştir</button>
-          </div>
-          <div id="sbStatus" class="muted" style="margin-top:6px"></div>
-        </section>
-
-      </div>
-
-      <footer>
-        © By_Puri — Bu bir şans oyunları yardımcı aracıdır; kazanç garantisi vermez.
-      </footer>
-    </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-  /***************
-   *  UTILITIES  *
-   ***************/
-  const BTN = (id)=>document.getElementById(id);
-  const E = (sel)=>document.querySelector(sel);
-  const CE = (t)=>document.createElement(t);
-  const rng = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-  function uniqSorted(arr){return Array.from(new Set(arr)).sort((a,b)=>a-b)}
-  function sampleWeighted(candidates, weights, k, exclude=new Set()){
-    const out=[];
-    const pool=candidates.filter(n=>!exclude.has(n));
-    const w=pool.map(n=>Math.max(0.0001, weights[n]||1));
-    // cumulative
-    const total=w.reduce((s,x)=>s+x,0);
-    for (let i=0;i<k && pool.length>0;i++){
-      let r=Math.random()*w.reduce((s,x)=>s+x,0), idx=0, sum=0;
-      for(; idx<w.length; idx++){ sum+=w[idx]; if(sum>=r) break; }
-      const n=pool[idx];
-      out.push(n);
-      // remove it
-      pool.splice(idx,1); w.splice(idx,1);
-    }
-    return out;
-  }
-  function sum(arr){return arr.reduce((a,b)=>a+b,0)}
-
-  /**********************
-   *  GLOBAL CONSTANTS  *
-   **********************/
-  const STORAGE_KEY="honumara_draws_v3";
-  const TICKET_SIZE=10;
-  const ANCHOR_SET=new Set([73,74,75,76,77,78,79]); // 73–79 çıpası
-  const HOT_CORE=new Set([11,13,15,17,23,24,25,26,29,31,33,34,41,47,50,53,56,59,61,63,67,71,73,74,75,77,79]);
-
-  const PAIRS=[[23,24],[24,25],[25,26],[32,33],[33,34],[47,48],[50,51],[53,54],[56,57],[58,59],[61,62],[63,64],[65,66],[67,68],[73,74],[74,75],[75,76],[76,77]];
-  const TRIPLES=[[23,24,25],[24,25,26],[32,33,34],[73,74,75],[74,75,76],[75,76,77]];
-  const QUADS=[[23,24,25,26],[73,74,75,77],[33,34,47,50]];
-  const QUINTS=[[11,13,15,17,23],[32,33,34,73,74],[47,50,53,56,59]];
-
-  // band aralıkları
-  const BAND_RANGES=[ [1,20], [21,40], [41,60], [61,80] ];
-
-  // kullanıcı ağırlık anahtarları
-  const SETTINGS={
-    wAnchor:true, wNeighbors:true, wMirror40:true, wLadder:true, wOddTilt:true, wHotCore:true
-  };
-  ["wAnchor","wNeighbors","wMirror40","wLadder","wOddTilt","wHotCore"].forEach(id=>{
-    BTN(id).addEventListener("change",e=>{ SETTINGS[id]=e.target.checked; refreshHotNow(); });
-  });
-
-  /****************
-   *  PERSISTENCE *
-   ****************/
-  function loadHistory(){
-    try{ const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return []; return JSON.parse(raw)||[]; }catch(_){ return []; }
-  }
-  function saveHistory(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); refreshHistory(); refreshHotNow(); }
-  function pushDraw(nums){
-    const hist=loadHistory(); hist.push(uniqSorted(nums)); saveHistory(hist);
-  }
-  function clearHistory(){ localStorage.removeItem(STORAGE_KEY); refreshHistory(); refreshHotNow(); }
-
-  /****************
-   *  WEIGHTING   *
-   ****************/
-  function computeWeights(){
-    const hist=loadHistory();
-    const weights=Array(81).fill(0); // 0 kullanılmıyor
-    // 1) taban band puanları (üst banda pozitif ofset)
-    for(let n=1;n<=80;n++){
-      if (n<=20) weights[n]+=1.0;
-      else if (n<=40) weights[n]+=1.2;
-      else if (n<=60) weights[n]+=1.3;
-      else weights[n]+=1.8; // 61–80
-    }
-    // 2) sıcak çekirdek
-    if(SETTINGS.wHotCore) HOT_CORE.forEach(n=>weights[n]+=3.0);
-
-    // 3) son K çekiliş—komşu göçü & ayna (40-fark)
-    const K=Math.min(3, hist.length);
-    const recentNums=new Set();
-    for(let i=1;i<=K;i++){
-      (hist[hist.length-i]||[]).forEach(x=>recentNums.add(x));
-    }
-    if(SETTINGS.wNeighbors || SETTINGS.wMirror40){
-      recentNums.forEach(n=>{
-        if(SETTINGS.wNeighbors){
-          [-2,-1,1,2].forEach(d=>{
-            const m=n+d; if(m>=1 && m<=80) weights[m]+=2.0;
-          });
-        }
-        if(SETTINGS.wMirror40){
-          if(n<=40){ weights[n+40]+=1.2; }
-          else { weights[n-40]+=1.2; }
-        }
-      });
-    }
-    return weights;
-  }
-
-  function bandTargetsFor10(){
-    // 10 sayılık bilet için band kotası:
-    // [1–20]:1–2, [21–40]:2–3, [41–60]:2–3, [61–80]:3–4
-    const base=[1,2,2,3]; // toplam 8
-    let rem=2;
-    const pref=[0,1,1,2]; // yüksek banda öncelik
-    while(rem>0){
-      let idx = (rem===2)?3 : (Math.random()<0.6?3:rng(1,2));
-      if(base[idx]< (idx===0?2:(idx<3?3:4))){ base[idx]++; rem--; }
-    }
-    return base; // [b1,b2,b3,b4] toplam 10
-  }
-
-  function pickFromRange(weights, a,b, count, used){
-    const cand=[]; for(let n=a;n<=b;n++) if(!used.has(n)) cand.push(n);
-    const sel=sampleWeighted(cand, weights, count, used);
-    sel.forEach(n=>used.add(n));
-    return sel;
-  }
-
-  function ensureAnchor(set, weights){
-    if(!SETTINGS.wAnchor) return set;
-    const have = Array.from(set).filter(n=>ANCHOR_SET.has(n)).length;
-    if(have>=2) return set;
-    // eksik olanı tamamla
-    const need=2-have;
-    const anchorCand=Array.from(ANCHOR_SET).filter(n=>!set.has(n));
-    // en yüksek ağırlıklı anchorları ekle
-    anchorCand.sort((a,b)=>(weights[b]-weights[a]));
-    for(let i=0;i<need && i<anchorCand.length;i++){
-      set.add(anchorCand[i]);
-      // rastgele bir başka (anchor olmayan) sayı çıkar ki toplam 10 kalsın
-      const others=Array.from(set).filter(n=>!ANCHOR_SET.has(n));
-      if(others.length>0){
-        // en düşük ağırlıklıyı çıkar
-        others.sort((a,b)=>weights[a]-weights[b]);
-        set.delete(others[0]);
-      }
-    }
-    return set;
-  }
-
-  function enforceOddTilt(set, weights){
-    if(!SETTINGS.wOddTilt) return set;
-    const arr=Array.from(set);
-    let odd=arr.filter(x=>x%2===1).length;
-    let even=TICKET_SIZE-odd;
-    if(odd>even) return set; // zaten iyi
-    // en düşük ağırlıklı bir çift çıkar, en iyi ağırlıklı tek ekle
-    const evens=arr.filter(x=>x%2===0).sort((a,b)=>weights[a]-weights[b]);
-    const poolOdd=Array.from({length:80},(_,i)=>i+1).filter(n=>n%2===1 && !set.has(n))
-                      .sort((a,b)=>weights[b]-weights[a]);
-    if(evens.length && poolOdd.length){
-      set.delete(evens[0]); set.add(poolOdd[0]);
-    }
-    return set;
-  }
-
-  function seedBySize(size){
-    if(size===2) return PAIRS[rng(0,PAIRS.length-1)];
-    if(size===3) return TRIPLES[rng(0,TRIPLES.length-1)];
-    if(size===4) return QUADS[rng(0,QUADS.length-1)];
-    if(size===5) return QUINTS[rng(0,QUINTS.length-1)];
-    return [];
-  }
-
-  function ensureLadder(set, weights){
-    if(!SETTINGS.wLadder) return set;
-    const arr=Array.from(set).sort((a,b)=>a-b);
-    let ok=false;
-    for(let i=1;i<arr.length;i++){
-      if(arr[i]===arr[i-1]+1){ ok=true; break; }
-    }
-    if(ok) return set;
-    // yoksa bir merdiven eklemeye çalış
-    const base = Array.from(set)[rng(0,set.size-1)];
-    const cand=[base+1, base-1].filter(n=>n>=1 && n<=80 && !set.has(n))
-                               .sort((a,b)=>weights[b]-weights[a]);
-    if(cand.length){
-      // düşük ağırlıklı birini çıkar, cand ekle
-      const sorted=arr.sort((a,b)=>weights[a]-weights[b]);
-      set.delete(sorted[0]); set.add(cand[0]);
-    }
-    return set;
-  }
-
-  function generateOneTicket(seedSize){
-    const weights=computeWeights();
-    const used=new Set();
-    // 1) seed
-    const seed = seedBySize(seedSize);
-    seed.forEach(n=>used.add(n));
-    // 2) band hedefleri
-    const bands=bandTargetsFor10(); // [b1,b2,b3,b4]
-    // seed içindeki sayıları bantlardan düş
-    seed.forEach(n=>{
-      const idx = (n<=20)?0:(n<=40)?1:(n<=60)?2:3;
-      if(bands[idx]>0) bands[idx]--;
-    });
-    // 3) bant bant doldur
-    const picks=[];
-    picks.push(...pickFromRange(weights,1,20,bands[0],used));
-    picks.push(...pickFromRange(weights,21,40,bands[1],used));
-    picks.push(...pickFromRange(weights,41,60,bands[2],used));
-    picks.push(...pickFromRange(weights,61,80,bands[3],used));
-    // 4) toplam 10’a tamamla (güvenlik)
-    while(used.size<TICKET_SIZE){
-      const all=Array.from({length:80},(_,i)=>i+1).filter(n=>!used.has(n));
-      const add=sampleWeighted(all,weights,1)[0];
-      if(add) used.add(add); else break;
-    }
-    // 5) zorunluluklar
-    ensureAnchor(used, weights);
-    ensureLadder(used, weights);
-    enforceOddTilt(used, weights);
-
-    return uniqSorted(Array.from(used));
-  }
-
-  function diversityFix(allTickets){
-    // biletler arası örtüşmeyi sınırlı tut (10 sayıda 6’dan çok ortak olmasın)
-    for(let i=0;i<allTickets.length;i++){
-      for(let j=0;j<i;j++){
-        const a=new Set(allTickets[i]); const b=new Set(allTickets[j]);
-        let inter=0; a.forEach(x=>{ if(b.has(x)) inter++; });
-        if(inter>6){
-          // düşük ağırlıklı 2 sayıyı değiştir
-          const w=computeWeights();
-          const sorted=Array.from(a).sort((x,y)=>w[x]-w[y]);
-          const used=new Set(a);
-          used.delete(sorted[0]); used.delete(sorted[1]);
-          const pool=Array.from({length:80},(_,k)=>k+1).filter(n=>!used.has(n))
-                        .sort((x,y)=>w[y]-w[x]);
-          if(pool.length>=2){ used.add(pool[0]); used.add(pool[1]); }
-          allTickets[i]=uniqSorted(Array.from(used));
-        }
-      }
-    }
-    return allTickets;
-  }
-
-  function generateTickets(seedSize, count=5){
-    const out=[];
-    for(let i=0;i<count;i++){
-      out.push(generateOneTicket(seedSize));
-    }
-    return diversityFix(out);
-  }
-
-  /**************
-   *  RENDER    *
-   **************/
-  function renderTickets(tickets){
-    const area=E("#ticketsArea");
-    area.innerHTML="";
-    tickets.forEach((t,i)=>{
-      const card=CE("div"); card.className="col-6";
-      card.innerHTML=`
+    <section class="wrap" id="tab-home">
+      <div class="grid g2">
         <div class="card">
-          <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:8px">
-            <div class="tag">Bilet #${i+1}</div>
-            <div class="muted">Tek/Çift: ${t.filter(x=>x%2===1).length}/${t.filter(x=>x%2===0).length}</div>
+          <h3 style="margin:0 0 6px">Çekiliş Girişi</h3>
+          <div class="row">
+            <input id="drawInput" type="text" inputmode="numeric"
+              placeholder="Örn: 1 6 10 12 15 21 24 28 33 42 44 48 57 58 59 62 63 68 71 74 76 79">
+            <button id="btnSave" class="primary">Kaydet + 3’lü x5 Üret</button>
           </div>
-          <div class="ticket">${t.map(n=>{
-            const cls = ANCHOR_SET.has(n) ? "num hot" : "num";
-            return \`<span class="\${cls}">\${n}</span>\`;
-          }).join("")}</div>
-        </div>`;
-      area.appendChild(card);
+          <div id="toast" class="muted" style="margin-top:8px"></div>
+          <div class="hr"></div>
+          <div class="row">
+            <button id="btn2">2’li x5</button>
+            <button id="btn3">3’lü x5</button>
+            <button id="btn4">4’lü x5</button>
+            <button id="btn5">5’li x5</button>
+            <span class="pill"><b id="statCnt">0</b> kayıt</span>
+            <span class="pill" title="Sıcak ilk 5">🔥 <b id="statHot">–</b></span>
+            <span class="pill" title="Soğuk ilk 3">❄️ <b id="statCold">–</b></span>
+          </div>
+
+          <div class="hr"></div>
+          <div>
+            <div class="muted" style="margin-bottom:6px">Şanslı sayı çarkı (2–5’li animasyon)</div>
+            <div class="wheel">
+              <div class="slot" id="w1">–</div>
+              <div class="slot" id="w2">–</div>
+              <div class="slot" id="w3">–</div>
+              <div class="slot" id="w4">–</div>
+              <div class="slot" id="w5">–</div>
+            </div>
+            <div class="row" style="margin-top:8px">
+              <button id="spin2">Çevir 2’li</button>
+              <button id="spin3">Çevir 3’lü</button>
+              <button id="spin4">Çevir 4’lü</button>
+              <button id="spin5">Çevir 5’li</button>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+          <div>
+            <div class="muted">Sıcak / Soğuk</div>
+            <div class="row" id="hotNow"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px">Geçmiş (son 12)</h3>
+          <div id="history"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3 style="margin:0 0 6px">Üretilen Biletler</h3>
+        <div class="tickets" id="tickets"></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="tab-momentum" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 10px">Momentum Penceresi</h3>
+        <div class="row">
+          <label class="pill" title="Model penceresi (son N çekiliş)">
+            Pencere:
+            <input id="winN" type="number" value="50" min="20" max="200" style="width:90px">
+          </label>
+          <label class="pill" title="Zamana bağlı ağırlık (1=eşit, <1 ise yeniye daha çok ağırlık)">
+            Decay:
+            <input id="decay" type="number" value="0.988" step="0.001" min="0.90" max="0.999" style="width:90px">
+          </label>
+          <button id="rebuild" class="primary">Modeli Güncelle</button>
+        </div>
+        <div class="hr"></div>
+        <div class="row" id="momTop"></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="tab-cluster" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Cluster Haritası (2/3/4/5)</h3>
+        <div class="row">
+          <button data-c="2" class="primary">2’li</button>
+          <button data-c="3">3’lü</button>
+          <button data-c="4">4’lü</button>
+          <button data-c="5">5’li</button>
+          <span class="muted">Pencere: son <b id="clWin">60</b> çekiliş</span>
+        </div>
+        <div class="hr"></div>
+        <div id="clusterBox" class="row"></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="tab-surprise" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Sürpriz İndeksi</h3>
+        <div class="muted">Beklenene göre en şaşırtıcı gelen sayılar (pozitif/negatif sapma).</div>
+        <div class="hr"></div>
+        <div id="surpriseBox" class="row"></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="tab-settings" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 6px">Ayarlar & Cloud</h3>
+        <div class="row">
+          <span class="pill" title="Toplam yerel kayıt"><b id="statAll">0</b> kayıt</span>
+          <button id="btnExport">Dışa Aktar (JSON)</button>
+          <button id="btnImport">İçe Aktar</button>
+          <input id="importFile" type="file" accept="application/json" hidden>
+        </div>
+        <div class="hr"></div>
+        <div class="muted" style="font-size:14px">
+          Cloud Sync için Supabase URL/Key koda gömülü. Tablon: <code>honumara_draws</code> (fields: <code>ts timestamptz</code>, <code>numbers json</code>).
+          Butonu açınca otomatik okur/yazar. Problem yaşarsan kapalı kullan.
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+
+// =============== Genel yardımcılar ===============
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const uniqSorted = a => [...new Set(a)].sort((x,y)=>x-y);
+const sum = a => a.reduce((p,c)=>p+c,0);
+
+function toast(msg, kind="ok"){
+  const box = $("#toast");
+  box.innerHTML = `<span class="${kind==='bad'?'bad':(kind==='warn'?'warn':'ok')}">${msg}</span>`;
+  if(kind==="ok") setTimeout(()=>box.textContent="", 2500);
+}
+
+// =============== State ===============
+const LS_KEY = "puri_honumara_v9";
+let state = { draws: [] };
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const j = JSON.parse(raw); if(Array.isArray(j.draws)) state.draws = j.draws; }
+  }catch(_){}
+}
+function saveState(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  $("#statAll").textContent = state.draws.length;
+  $("#statCnt").textContent = state.draws.length;
+}
+
+loadState();
+
+// =============== Supabase (opsiyonel) ===============
+const SUPABASE_URL  = "https://lnxzfolvnqrffsodedbu.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxueHpmb2x2bnFyZmZzb2RlZGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMDAzMjYsImV4cCI6MjA3MTc3NjMyNn0.Xasa3ktjfwA2k2BKlMdMgtm0RVt38kUn_7IwgoYhtTI";
+let sb = null;
+let CLOUD = false;
+
+$("#cloudToggle").addEventListener("change", async (e)=>{
+  CLOUD = e.target.checked;
+  if(CLOUD){
+    try{
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      const { data, error } = await sb.from("honumara_draws").select("*").order("ts",{ascending:true}).limit(5000);
+      if(error) throw error;
+      if(Array.isArray(data) && data.length){
+        // merge (duplikeleri at)
+        const seen = new Set(state.draws.map(x=>JSON.stringify(x.numbers)));
+        for(const r of data){
+          const nums = Array.isArray(r.numbers) ? r.numbers : [];
+          const key = JSON.stringify(nums);
+          if(nums.length && !seen.has(key)){
+            state.draws.push({ts:r.ts, numbers:uniqSorted(nums)});
+          }
+        }
+        saveState(); rebuildAll();
+      }
+      toast("Cloud bağlandı ve senkronize edildi ✅","ok");
+    }catch(err){
+      toast("Cloud hatası: "+err.message,"bad");
+      $("#cloudToggle").checked = false; CLOUD=false;
+    }
+  }else{
+    toast("Cloud kapandı (yerel mod).","warn");
+  }
+});
+
+// =============== Model ===============
+const model = {
+  winN: 50,
+  decay: 0.988,
+  score: new Array(81).fill(0),
+  top: [], bottom: []
+};
+
+function buildModel(){
+  const N = state.draws.length;
+  const W = Math.max(20, Math.min(200, model.winN));
+  const start = Math.max(0, N - W);
+  const freq = new Array(81).fill(0);
+  const rec = new Array(81).fill(0);
+  const streak = new Array(81).fill(0);
+  const neighbor = new Array(81).fill(0);
+
+  for(let i=start;i<N;i++){
+    const d = state.draws[i]; const w = Math.pow(model.decay, N-1-i);
+    d.numbers.forEach(n=>{ freq[n]++; rec[n]+=w; });
+  }
+
+  const last8 = state.draws.slice(-8);
+  for(const d of last8){
+    for(let n=1;n<=80;n++){
+      if(d.numbers.includes(n)) streak[n]+=1; else streak[n]=Math.max(0,streak[n]-0.3);
+    }
+  }
+
+  const last3 = state.draws.slice(-3);
+  for(const d of last3){
+    d.numbers.forEach(n=>{
+      if(n>1) neighbor[n-1]+=0.4;
+      if(n<80) neighbor[n+1]+=0.4;
     });
   }
 
-  function refreshHistory(){
-    const area=E("#historyArea");
-    const hist=loadHistory().slice(-30); // son 30 göster
-    if(hist.length===0){ area.innerHTML='<div class="muted">Kayıt yok. İlk çekilişi yukarıdan kaydet.</div>'; return; }
-    area.innerHTML="";
-    hist.slice().reverse().forEach((row,idx)=>{
-      const line=CE("div"); line.style.margin="6px 0";
-      line.innerHTML = `<span class="tag">#${hist.length-idx}</span> ` +
-                       row.map(n=>`<span class="num ${ANCHOR_SET.has(n)?"hot":""}">${n}</span>`).join("");
-      area.appendChild(line);
-    });
+  const last12 = state.draws.slice(-12);
+  const tmp = new Array(81).fill(0);
+  for(const d of last12){ d.numbers.forEach(n=>tmp[n]++); }
+  const hotPenalty = new Array(81).fill(0);
+  for(let n=1;n<=80;n++){
+    if(tmp[n]>=6) hotPenalty[n]=1.2; else if(tmp[n]>=4) hotPenalty[n]=0.6;
   }
 
-  function refreshHotNow(){
-    const weights=computeWeights();
-    const arr=Array.from({length:80},(_,i)=>i+1).map(n=>({n,w:weights[n]}));
-    arr.sort((a,b)=>b.w-a.w);
-    const top=arr.slice(0,20);
-    E("#hotNow").innerHTML = top.map(x=>{
-      const cls=ANCHOR_SET.has(x.n)?"num hot":"num";
-      return `<span class="${cls}" title="w=${x.w.toFixed(2)}">${x.n}</span>`;
-    }).join(" ");
+  for(let n=1;n<=80;n++){
+    model.score[n] = 1.0*freq[n] + 1.8*rec[n] + 0.6*streak[n] + 0.5*neighbor[n] - 0.9*hotPenalty[n];
+  }
+  const last = state.draws[state.draws.length-1];
+  if(last) last.numbers.forEach(n=>model.score[n]-=0.8);
+
+  const all = Array.from({length:80},(_,i)=>i+1);
+  model.top = all.slice().sort((a,b)=>model.score[b]-model.score[a]);
+  model.bottom = all.slice().sort((a,b)=>model.score[a]-model.score[b]);
+
+  // UI özet
+  $("#statHot").textContent = model.top.slice(0,5).join(", ");
+  $("#statCold").textContent = model.bottom.slice(0,3).join(", ");
+  renderHot();
+  renderMomentumTop();
+}
+
+function renderHot(){
+  const box = $("#hotNow"); box.innerHTML="";
+  model.top.slice(0,12).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num hot">${n} 🔥</span>`));
+  model.bottom.slice(0,6).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num cold">${n} ❄️</span>`));
+}
+
+function renderHistory(){
+  const box = $("#history");
+  const last = state.draws.slice(-12).reverse();
+  if(!last.length){ box.innerHTML = `<div class="muted">Henüz kayıt yok.</div>`; return; }
+  box.innerHTML = last.map(d=>{
+    const line = d.numbers.map(n=>`<span class="num">${n}</span>`).join("");
+    return `<div class="row" style="margin:6px 0"><span class="tag">${new Date(d.ts).toLocaleString()}</span>${line}</div>`;
+  }).join("");
+  $("#statCnt").textContent = state.draws.length;
+}
+
+function renderMomentumTop(){
+  const box = $("#momTop"); if(!box) return; box.innerHTML="";
+  model.top.slice(0,24).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num">${n}</span>`));
+}
+
+// =============== Girdi & Kayıt ===============
+function parseNums(raw){
+  return raw.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>n>=1 && n<=80);
+}
+async function addDraw(nums){
+  const clean = uniqSorted(nums);
+  if(!clean.length) throw new Error("Geçerli sayı yok.");
+  state.draws.push({ts:new Date().toISOString(), numbers:clean});
+  saveState();
+  if(CLOUD && sb){
+    try{
+      const {error} = await sb.from("honumara_draws").insert({ts:new Date().toISOString(), numbers:clean});
+      if(error) console.warn("Cloud yazılamadı:", error.message);
+    }catch(e){ console.warn("Cloud kapalı:", e.message); }
+  }
+}
+
+// =============== Üretim Motoru ===============
+function passesConstraints(nums){
+  const A = uniqSorted(nums); if(A.length!==10) return false;
+  const last = state.draws[state.draws.length-1]?.numbers || [];
+  const prev = state.draws[state.draws.length-2]?.numbers || [];
+
+  // parite
+  const ev = A.filter(x=>x%2===0).length; if(ev<3 || ev>7) return false;
+  // alt-üst (1-40 / 41-80)
+  const low = A.filter(x=>x<=40).length; if(low<3 || low>7) return false;
+  // son çekilişle tekrar sınırı
+  const rep1 = A.filter(x=>last.includes(x)).length; if(rep1>4) return false;
+  // iki çekiliş köprü toplam tekrar
+  const rep2 = A.filter(x=>prev.includes(x)).length; if(rep1+rep2>7) return false;
+  // arka arkaya farkı 1 olan ikili sayısı
+  let adj=0; for(let i=1;i<A.length;i++) if(A[i]-A[i-1]===1) adj++; if(adj>3) return false;
+  // 10'luk dilimler: min 6 dilim
+  const bins = new Set(A.map(x=>Math.floor((x-1)/8))); if(bins.size<6) return false;
+  return true;
+}
+
+function makeTicket(lock=3, attemptCap=80){
+  const last = state.draws[state.draws.length-1]?.numbers || [];
+  const seeds = model.top.filter(n=>!last.includes(n)).slice(0,10); // sıcak tohum havuzu
+  const chosen = new Set();
+
+  // 1) kilit
+  for(let i=0;i<lock;i++) chosen.add(seeds[i%seeds.length]);
+
+  // 2) dengeli seç: 10'luk dilimler üzerinde dolaş
+  const bins = [[1,8],[9,16],[17,24],[25,32],[33,40],[41,48],[49,56],[57,64],[65,72],[73,80]];
+  let idx = Math.floor(Math.random()*bins.length);
+  while(chosen.size<10){
+    const [a,b] = bins[idx];
+    const cand = model.top.filter(n=>n>=a && n<=b && !chosen.has(n));
+    const pick = cand[0] || model.top.find(n=>!chosen.has(n));
+    if(pick) chosen.add(pick);
+    idx = (idx+1)%bins.length;
   }
 
-  /**************
-   *  EVENTS    *
-   **************/
-  BTN("gen2").onclick = ()=>renderTickets(generateTickets(2,5));
-  BTN("gen3").onclick = ()=>renderTickets(generateTickets(3,5));
-  BTN("gen4").onclick = ()=>renderTickets(generateTickets(4,5));
-  BTN("gen5").onclick = ()=>renderTickets(generateTickets(5,5));
-  BTN("clearTickets").onclick = ()=>{ E("#ticketsArea").innerHTML=""; };
-
-  BTN("saveDraw").onclick = ()=>{
-    const raw=BTN("drawInput").value.trim();
-    if(!raw){ alert("Örnek format: 1 3 7 11 15 24 33 47 56 63 74 77 79"); return; }
-    const nums=uniqSorted(raw.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>n>=1 && n<=80));
-    if(nums.length<6){ alert("En az 6 sayı gir."); return; }
-    pushDraw(nums); BTN("drawInput").value="";
-  };
-  BTN("clearHistory").onclick = ()=>{ if(confirm("Geçmişi silmek istiyor musun?")) clearHistory(); };
-
-  // Kısayollar
-  document.addEventListener("keydown",(e)=>{
-    if(e.target.tagName==="INPUT") return;
-    if(e.key==="2") BTN("gen2").click();
-    if(e.key==="3") BTN("gen3").click();
-    if(e.key==="4") BTN("gen4").click();
-    if(e.key==="5") BTN("gen5").click();
-    if(e.key.toLowerCase()==="t") BTN("clearTickets").click();
+  // 3) aşırı sıcak ilk 2 varsa birini soğukla değiştir
+  model.top.slice(0,2).forEach(h=>{
+    if(chosen.has(h)){
+      const repl = model.bottom.find(n=>!chosen.has(n) && !last.includes(n));
+      if(repl){ chosen.delete(h); chosen.add(repl); }
+    }
   });
 
-  /*****************
-   *  SUPABASE UX  *
-   *****************/
-  let sb=null;
-  BTN("sbEnable").onclick = async ()=>{
-    const url=BTN("sbUrl").value.trim(), key=BTN("sbKey").value.trim();
-    if(!url || !key){ E("#sbStatus").textContent="Eksik bilgi. LocalStorage ile devam."; sb=null; return; }
-    try{
-      sb=window.supabase.createClient(url,key);
-      E("#sbStatus").textContent="Hazır. (Bu demo sürümü yalnızca yerelde çalışır; entegrasyon örnek amaçlıdır.)";
-    }catch(err){
-      E("#sbStatus").textContent="Hata: "+err.message; sb=null;
-    }
-  };
-
-  // İlk yükleme
-  refreshHistory(); refreshHotNow();
-
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  // 4) kısıtları sağlamak için küçük mutasyonlar
+  let arr = uniqSorted([...chosen]);
+  let tries=0;
+  while(!passesConstraints(arr) && tries<attemptCap){
+    // en sıcak olanı çıkar, orta sıcaktan/soğuktan ekle
+    const bad = arr[Math.floor(Math.random()*arr.length)];
+    const repl = model.top.slice(8,40).concat(model.bottom.slice(0,30)).find(n=>!arr.includes(n));
+    if(repl){ arr = uniqSorted(arr.filter(x=>x!==bad).concat([repl])); }
+    tries++;
   }
-  </script>
+  return arr;
+}
+
+function generateBatch(lock=3,count=5){
+  const out=[];
+  for(let i=0;i<count;i++){
+    out.push({meta:`${lock}’li kilit • ${new Date().toLocaleTimeString()}`, numbers:makeTicket(lock)});
+  }
+  renderTickets(out);
+  return out;
+}
+
+function renderTickets(tickets){
+  const box = $("#tickets");
+  if(!tickets.length){ box.innerHTML = `<div class="muted">Henüz bilet yok.</div>`; return; }
+  box.innerHTML = tickets.map(t=>{
+    return `<div class="ticket">
+      <div class="tag">${t.meta}</div>
+      <div class="row" style="margin-top:6px">${t.numbers.map(n=>`<span class="num">${n}</span>`).join("")}</div>
+    </div>`;
+  }).join("");
+}
+
+// =============== Çark (2–5’li) ===============
+function spin(k){
+  const ids=["#w1","#w2","#w3","#w4","#w5"];
+  ids.forEach(sel=>$(sel).classList.remove("spin"));
+  // seçililer
+  const pick = model.top.filter(n=>n>=1).slice(0,12); // sıcak havuz
+  const chosen = uniqSorted(pick.slice(0,k));
+  // animasyon
+  for(let i=0;i<5;i++){
+    const el = $(ids[i]);
+    el.textContent = "–";
+    if(i<k){
+      el.classList.add("spin");
+      let t=0; const iv = setInterval(()=>{
+        el.textContent = String(1+Math.floor(Math.random()*80));
+        if(++t>15){ clearInterval(iv); el.classList.remove("spin"); el.textContent = String(chosen[i]); }
+      },60);
+    }
+  }
+}
+$("#spin2").onclick = ()=>spin(2);
+$("#spin3").onclick = ()=>spin(3);
+$("#spin4").onclick = ()=>spin(4);
+$("#spin5").onclick = ()=>spin(5);
+
+// =============== Cluster (2/3/4/5) ===============
+function countCombos(k, win=60){
+  const start = Math.max(0, state.draws.length - win);
+  const map = new Map();
+  for(let i=start;i<state.draws.length;i++){
+    const arr = state.draws[i].numbers;
+    comb(arr,k).forEach(c=>{
+      const key = c.join("-");
+      map.set(key, (map.get(key)||0)+1);
+    });
+  }
+  return [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,40);
+}
+function comb(arr,k){
+  const out=[]; (function go(start, buf){ if(buf.length===k){ out.push(buf.slice()); return;}
+    for(let i=start;i<arr.length;i++){ buf.push(arr[i]); go(i+1,buf); buf.pop(); }
+  })(0,[]);
+  return out;
+}
+function renderCluster(k=2){
+  $("#clWin").textContent = "60";
+  const box = $("#clusterBox"); box.innerHTML="";
+  const top = countCombos(k,60);
+  if(!top.length){ box.innerHTML = `<div class="muted">Yeterli veri yok.</div>`; return; }
+  top.forEach(([key,c])=>{
+    const nums = key.split("-").map(n=>`<span class="num">${n}</span>`).join("");
+    box.insertAdjacentHTML("beforeend", `<div class="pill" style="margin:4px">${nums}<span class="tag">×${c}</span></div>`);
+  });
+}
+$$('#tab-cluster [data-c]').forEach(b=>b.addEventListener("click",e=>{
+  $$('#tab-cluster [data-c]').forEach(x=>x.classList.remove("primary")); e.target.classList.add("primary");
+  renderCluster(parseInt(e.target.dataset.c,10));
+}));
+
+// =============== Sürpriz İndeksi ===============
+function surprise(){
+  const N = state.draws.length; if(N<30) return [];
+  // beklenen: momentum skoru normalize
+  const sc = model.score.slice();
+  const base = []; for(let n=1;n<=80;n++) base.push([n, Math.max(0,sc[n])]); 
+  const tot = sum(base.map(x=>x[1])) || 1;
+  const p = new Map(base.map(([n,s])=>[n, s/tot]));
+  // son çekiliş
+  const last = state.draws[N-1].numbers;
+  const obs = new Map(Array.from({length:80},(_,i)=>[i+1,0]));
+  last.forEach(n=>obs.set(n,1)); // 0/1
+  // fark (z)
+  const rows = []; for(let n=1;n<=80;n++){ rows.push([n, (obs.get(n)-p.get(n))]); }
+  rows.sort((a,b)=>Math.abs(b[1]) - Math.abs(a[1]));
+  return rows.slice(0,20);
+}
+function renderSurprise(){
+  const box = $("#surpriseBox"); box.innerHTML="";
+  const rows = surprise();
+  if(!rows.length){ box.innerHTML = `<div class="muted">Yeterli veri yok (≥30 kayıt gerekli).</div>`; return; }
+  rows.forEach(([n,z])=>{
+    const cls = z>0? "hot" : "cold";
+    box.insertAdjacentHTML("beforeend", `<span class="num ${cls}" title="${(z>0?'+':'')+z.toFixed(3)}">${n}</span>`);
+  });
+}
+
+// =============== UI Bağlantıları ===============
+$("#btnSave").onclick = async ()=>{
+  try{
+    const raw = $("#drawInput").value.trim(); if(!raw) return toast("Sayı gir.","bad");
+    const nums = parseNums(raw);
+    if(nums.length<6) return toast("En az birkaç sayı gir.","bad");
+    await addDraw(nums);
+    $("#drawInput").value = "";
+    toast("Kaydedildi ve bilet üretildi ✅","ok");
+    buildModel(); renderHistory(); generateBatch(3,5);
+  }catch(e){ toast("Hata: "+e.message,"bad"); }
+};
+$("#btn2").onclick = ()=>generateBatch(2,5);
+$("#btn3").onclick = ()=>generateBatch(3,5);
+$("#btn4").onclick = ()=>generateBatch(4,5);
+$("#btn5").onclick = ()=>generateBatch(5,5);
+
+// momentum ayarları
+$("#rebuild").onclick = ()=>{ 
+  model.winN = parseInt($("#winN").value,10)||50;
+  model.decay = parseFloat($("#decay").value)||0.988;
+  buildModel(); toast("Model güncellendi.","ok");
+};
+
+// export / import
+$("#btnExport").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download="honumara_state.json"; a.click();
+};
+$("#btnImport").onclick = ()=>$("#importFile").click();
+$("#importFile").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader(); r.onload = ()=>{
+    try{
+      const j = JSON.parse(r.result); if(Array.isArray(j.draws)){ state.draws=j.draws; saveState(); rebuildAll(); toast("İçe aktarıldı.","ok"); }
+      else toast("Geçersiz dosya.","bad");
+    }catch(err){ toast("Hata: "+err.message,"bad"); }
+  }; r.readAsText(f);
+});
+
+// tab gezinme + drawer
+$$("nav .nav button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    $$("nav .nav button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    $$("main > section.wrap").forEach(s=>s.hidden = (s.id !== "tab-"+tab));
+    if(window.innerWidth<980) $("#drawer").classList.remove("open");
+    if(tab==="cluster") renderCluster(2);
+    if(tab==="surprise") renderSurprise();
+  });
+});
+$("#btnBurger").onclick = ()=> $("#drawer").classList.toggle("open");
+
+// =============== İlk yükleme ===============
+function rebuildAll(){
+  saveState(); renderHistory(); buildModel(); renderSurprise();
+  renderCluster(2); renderMomentumTop();
+}
+rebuildAll();
+
+// PWA SW
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+
+})();</script>
 </body>
 </html>
