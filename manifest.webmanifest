@@ -1,12 +1,12 @@
 {
   "name": "HIZLI ON NUMARA • By_Puri",
-  "short_name": "By_Puri",
-  "start_url": ".",
+  "short_name": "HızlıON",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#0b1021",
-  "theme_color": "#0f172a",
+  "background_color": "#0b1020",
+  "theme_color": "#0e1327",
   "icons": [
-    { "src": "icons/p-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/p-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
