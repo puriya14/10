@@ -1,5 +1,5 @@
 // sw.js
-const CACHE = "puri-honumara-v9";
+const CACHE = "puri-honumara-v10";
 const ASSETS = ["./","./index.html","./manifest.json"];
 
 self.addEventListener("install",e=>{
