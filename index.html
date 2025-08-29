@@ -99,7 +99,8 @@
         <div class="card">
           <h3 style="margin:0 0 6px">Çekiliş Girişi</h3>
           <div class="row">
-            <input id="drawInput" type="text" inputmode="numeric"
+            <!-- inputmode kaldırıldı → iPhone’da boşluk tuşu gelir -->
+            <input id="drawInput" type="text" autocapitalize="off" autocorrect="off" spellcheck="false"
               placeholder="Örn: 1 6 10 12 15 21 24 28 33 42 44 48 57 58 59 62 63 68 71 74 76 79">
             <button id="btnSave" class="primary">Kaydet + 3’lü x5 Üret</button>
           </div>
@@ -231,7 +232,7 @@ function toast(msg, kind="ok"){
 }
 
 // =============== State ===============
-const LS_KEY = "puri_honumara_v9";
+const LS_KEY = "puri_honumara_v10";
 let state = { draws: [] };
 
 function loadState(){
@@ -262,7 +263,6 @@ $("#cloudToggle").addEventListener("change", async (e)=>{
       const { data, error } = await sb.from("honumara_draws").select("*").order("ts",{ascending:true}).limit(5000);
       if(error) throw error;
       if(Array.isArray(data) && data.length){
-        // merge (duplikeleri at)
         const seen = new Set(state.draws.map(x=>JSON.stringify(x.numbers)));
         for(const r of data){
           const nums = Array.isArray(r.numbers) ? r.numbers : [];
@@ -376,6 +376,7 @@ async function addDraw(nums){
   if(!clean.length) throw new Error("Geçerli sayı yok.");
   state.draws.push({ts:new Date().toISOString(), numbers:clean});
   saveState();
+  // Cloud opsiyonel
   if(CLOUD && sb){
     try{
       const {error} = await sb.from("honumara_draws").insert({ts:new Date().toISOString(), numbers:clean});
@@ -436,7 +437,6 @@ function makeTicket(lock=3, attemptCap=80){
   let arr = uniqSorted([...chosen]);
   let tries=0;
   while(!passesConstraints(arr) && tries<attemptCap){
-    // en sıcak olanı çıkar, orta sıcaktan/soğuktan ekle
     const bad = arr[Math.floor(Math.random()*arr.length)];
     const repl = model.top.slice(8,40).concat(model.bottom.slice(0,30)).find(n=>!arr.includes(n));
     if(repl){ arr = uniqSorted(arr.filter(x=>x!==bad).concat([repl])); }
@@ -469,10 +469,8 @@ function renderTickets(tickets){
 function spin(k){
   const ids=["#w1","#w2","#w3","#w4","#w5"];
   ids.forEach(sel=>$(sel).classList.remove("spin"));
-  // seçililer
-  const pick = model.top.filter(n=>n>=1).slice(0,12); // sıcak havuz
+  const pick = model.top.filter(n=>n>=1).slice(0,12);
   const chosen = uniqSorted(pick.slice(0,k));
-  // animasyon
   for(let i=0;i<5;i++){
     const el = $(ids[i]);
     el.textContent = "–";
@@ -527,16 +525,13 @@ $$('#tab-cluster [data-c]').forEach(b=>b.addEventListener("click",e=>{
 // =============== Sürpriz İndeksi ===============
 function surprise(){
   const N = state.draws.length; if(N<30) return [];
-  // beklenen: momentum skoru normalize
   const sc = model.score.slice();
   const base = []; for(let n=1;n<=80;n++) base.push([n, Math.max(0,sc[n])]); 
   const tot = sum(base.map(x=>x[1])) || 1;
   const p = new Map(base.map(([n,s])=>[n, s/tot]));
-  // son çekiliş
   const last = state.draws[N-1].numbers;
   const obs = new Map(Array.from({length:80},(_,i)=>[i+1,0]));
-  last.forEach(n=>obs.set(n,1)); // 0/1
-  // fark (z)
+  last.forEach(n=>obs.set(n,1));
   const rows = []; for(let n=1;n<=80;n++){ rows.push([n, (obs.get(n)-p.get(n))]); }
   rows.sort((a,b)=>Math.abs(b[1]) - Math.abs(a[1]));
   return rows.slice(0,20);
@@ -556,7 +551,7 @@ $("#btnSave").onclick = async ()=>{
   try{
     const raw = $("#drawInput").value.trim(); if(!raw) return toast("Sayı gir.","bad");
     const nums = parseNums(raw);
-    if(nums.length<6) return toast("En az birkaç sayı gir.","bad");
+    if(nums.length<6) return toast("En az 6 sayı gir.","bad");
     await addDraw(nums);
     $("#drawInput").value = "";
     toast("Kaydedildi ve bilet üretildi ✅","ok");
