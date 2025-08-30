@@ -7,9 +7,7 @@
 <meta name="theme-color" content="#0e1327">
 <link rel="manifest" href="manifest.json">
 <style>
-  :root{
-    --bg:#0b1020; --card:#11173a; --mut:#8ea1c7; --line:#223057; --acc:#60a5fa; --ok:#22c55e; --bad:#ef4444;
-  }
+  :root{--bg:#0b1020;--card:#11173a;--mut:#8ea1c7;--line:#223057;--acc:#60a5fa;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,#0b1020,#0b1020 60%,#0a0f1f);color:#dbe5ff;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
   a{color:#9dc1ff;text-decoration:none} a:hover{text-decoration:underline}
@@ -42,8 +40,10 @@
   .tickets{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
   .ticket{background:#0f1733;border:1px dashed #2b3662;border-radius:12px;padding:10px}
   .tag{font-size:12px;color:#93a1c8}
-  .warn{color:#f59e0b}
-  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .grid80{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+  .cell{aspect-ratio:1/1;border-radius:8px;display:grid;place-items:center;border:1px solid #223149;background:#0c1220;font-size:12px}
+  .cell.hot{outline:2px solid #ef4444aa} .cell.cold{outline:2px solid #38bdf8aa}
   /* Wheel */
   .wheel{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
   .slot{height:44px;border:1px solid #2c3a78;border-radius:10px;display:grid;place-items:center;background:#0f1733;font-size:18px;font-weight:800}
@@ -75,6 +75,10 @@
       <button data-tab="momentum">📈 Momentum</button>
       <button data-tab="cluster">🧩 Cluster 2/3/4/5</button>
       <button data-tab="surprise">🎯 Sürpriz İndeksi</button>
+      <button data-tab="bias">🧪 Bias Lab (Adaptif)</button>
+      <button data-tab="daypart">🕑 Daypart & Hafta</button>
+      <button data-tab="ev">💰 EV & Ödeme</button>
+      <button data-tab="ab">🧭 A/B Testi</button>
       <button data-tab="settings">⚙️ Ayarlar & Cloud</button>
     </div>
     <div class="foot">© Puri • eğitim/analiz amaçlı; şans oyunlarında garanti yoktur.</div>
@@ -86,7 +90,7 @@
         <button class="burger" id="btnBurger">☰ Menü</button>
         <div style="flex:1;min-width:0">
           <div style="font-weight:800">HIZLI ON NUMARA • By_Puri</div>
-          <div class="muted" style="font-size:12px">Akıllı ağırlıklandırma + kısıtlı üretim motoru</div>
+          <div class="muted" style="font-size:12px">Akıllı ağırlıklandırma + kısıtlı üretim + bias avcısı</div>
         </div>
         <label class="pill" title="Supabase ile bulut eşitleme">
           <input id="cloudToggle" type="checkbox"> Cloud Sync
@@ -94,12 +98,12 @@
       </div>
     </header>
 
+    <!-- HOME -->
     <section class="wrap" id="tab-home">
       <div class="grid g2">
         <div class="card">
           <h3 style="margin:0 0 6px">Çekiliş Girişi</h3>
           <div class="row">
-            <!-- inputmode kaldırıldı → iPhone’da boşluk tuşu gelir -->
             <input id="drawInput" type="text" autocapitalize="off" autocorrect="off" spellcheck="false"
               placeholder="Örn: 1 6 10 12 15 21 24 28 33 42 44 48 57 58 59 62 63 68 71 74 76 79">
             <button id="btnSave" class="primary">Kaydet + 3’lü x5 Üret</button>
@@ -114,17 +118,14 @@
             <span class="pill"><b id="statCnt">0</b> kayıt</span>
             <span class="pill" title="Sıcak ilk 5">🔥 <b id="statHot">–</b></span>
             <span class="pill" title="Soğuk ilk 3">❄️ <b id="statCold">–</b></span>
+            <span class="pill" id="alarmPill" title="Anomali alarmı">🛎️ normal</span>
           </div>
 
           <div class="hr"></div>
           <div>
             <div class="muted" style="margin-bottom:6px">Şanslı sayı çarkı (2–5’li animasyon)</div>
             <div class="wheel">
-              <div class="slot" id="w1">–</div>
-              <div class="slot" id="w2">–</div>
-              <div class="slot" id="w3">–</div>
-              <div class="slot" id="w4">–</div>
-              <div class="slot" id="w5">–</div>
+              <div class="slot" id="w1">–</div><div class="slot" id="w2">–</div><div class="slot" id="w3">–</div><div class="slot" id="w4">–</div><div class="slot" id="w5">–</div>
             </div>
             <div class="row" style="margin-top:8px">
               <button id="spin2">Çevir 2’li</button>
@@ -153,16 +154,15 @@
       </div>
     </section>
 
+    <!-- MOMENTUM -->
     <section class="wrap" id="tab-momentum" hidden>
       <div class="card">
         <h3 style="margin:0 0 10px">Momentum Penceresi</h3>
         <div class="row">
-          <label class="pill" title="Model penceresi (son N çekiliş)">
-            Pencere:
+          <label class="pill" title="Model penceresi (son N çekiliş)">Pencere:
             <input id="winN" type="number" value="50" min="20" max="200" style="width:90px">
           </label>
-          <label class="pill" title="Zamana bağlı ağırlık (1=eşit, <1 ise yeniye daha çok ağırlık)">
-            Decay:
+          <label class="pill" title="Zamana ağırlık (1=eşit, <1 yeniye ağırlık)">Decay:
             <input id="decay" type="number" value="0.988" step="0.001" min="0.90" max="0.999" style="width:90px">
           </label>
           <button id="rebuild" class="primary">Modeli Güncelle</button>
@@ -172,9 +172,10 @@
       </div>
     </section>
 
+    <!-- CLUSTER -->
     <section class="wrap" id="tab-cluster" hidden>
       <div class="card">
-        <h3 style="margin:0 0 8px">Cluster Haritası (2/3/4/5)</h3>
+        <h3 style="margin:0 0 8px">Cluster Haritası (2/3/4/5 + Lift)</h3>
         <div class="row">
           <button data-c="2" class="primary">2’li</button>
           <button data-c="3">3’lü</button>
@@ -187,6 +188,7 @@
       </div>
     </section>
 
+    <!-- SURPRISE -->
     <section class="wrap" id="tab-surprise" hidden>
       <div class="card">
         <h3 style="margin:0 0 8px">Sürpriz İndeksi</h3>
@@ -196,6 +198,84 @@
       </div>
     </section>
 
+    <!-- BIAS LAB -->
+    <section class="wrap" id="tab-bias" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Bias Lab (istatistik testleri & adaptasyon)</h3>
+        <div class="row">
+          <label class="pill">Pencere W:
+            <input id="biasW" type="number" value="80" min="40" max="300" style="width:90px">
+          </label>
+          <button id="btnBiasRun" class="primary">Testleri Çalıştır</button>
+          <span class="pill" id="biasSummary">–</span>
+        </div>
+        <div class="hr"></div>
+
+        <h4>1) Chi-Square ısı haritası (1..80)</h4>
+        <div id="chiGrid" class="grid80"></div>
+
+        <div class="hr"></div>
+        <h4>2) Runs testleri</h4>
+        <div class="row" id="runsOut"></div>
+
+        <div class="hr"></div>
+        <h4>3) Mod-10 & Mod-8</h4>
+        <div class="row" id="modOut"></div>
+
+        <div class="hr"></div>
+        <h4>4) Sum-Z, Lag-1/Lag-2 korelasyon, Overlap</h4>
+        <div class="row" id="otherStats"></div>
+
+        <div class="hr"></div>
+        <h4>5) Bayes Shrinker (posterior + alt güven bandı)</h4>
+        <div class="row" id="bayesOut"></div>
+      </div>
+    </section>
+
+    <!-- DAYPART -->
+    <section class="wrap" id="tab-daypart" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Daypart & Hafta Görünümleri</h3>
+        <div class="muted">Sabah (06–11), Öğlen-Akşam (12–23), Gece (00–05) ve Hafta içi/sonu için farklı “sıcak havuz” farkları.</div>
+        <div class="hr"></div>
+        <div class="row" id="daypartOut"></div>
+      </div>
+    </section>
+
+    <!-- EV -->
+    <section class="wrap" id="tab-ev" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">EV & Ödeme Tablosu</h3>
+        <div class="row">
+          <label class="pill">Bilet boyutu:
+            <input id="evK" type="number" value="10" min="2" max="20" style="width:90px">
+          </label>
+          <label class="pill">Ödeme (JSON, { "2":x, "3":y, ... }):
+            <input id="evPay" type="text" value='{"2":5,"3":12,"4":50,"5":200,"6":800,"7":3000,"8":12000,"9":60000,"10":250000}' style="min-width:360px">
+          </label>
+          <button id="btnEV" class="primary">EV Hesapla</button>
+        </div>
+        <div class="hr"></div>
+        <div id="evOut"></div>
+      </div>
+    </section>
+
+    <!-- AB TEST -->
+    <section class="wrap" id="tab-ab" hidden>
+      <div class="card">
+        <h3 style="margin:0 0 8px">A/B Testi (son B çekiliş, online backtest)</h3>
+        <div class="row">
+          <label class="pill">B (kaç çekiliş):
+            <input id="abB" type="number" value="20" min="10" max="60" style="width:90px">
+          </label>
+          <button id="btnAB" class="primary">Çalıştır</button>
+        </div>
+        <div class="hr"></div>
+        <div id="abOut"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
     <section class="wrap" id="tab-settings" hidden>
       <div class="card">
         <h3 style="margin:0 0 6px">Ayarlar & Cloud</h3>
@@ -219,42 +299,43 @@
 <script>
 (()=>{
 
-// =============== Genel yardımcılar ===============
+// ========= yardımcılar =========
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const uniqSorted = a => [...new Set(a)].sort((x,y)=>x-y);
 const sum = a => a.reduce((p,c)=>p+c,0);
-
-function toast(msg, kind="ok"){
-  const box = $("#toast");
-  box.innerHTML = `<span class="${kind==='bad'?'bad':(kind==='warn'?'warn':'ok')}">${msg}</span>`;
-  if(kind==="ok") setTimeout(()=>box.textContent="", 2500);
+const mean = a => (a.length? sum(a)/a.length : 0);
+const sd = a => { const m=mean(a); return Math.sqrt(mean(a.map(x=>(x-m)*(x-m)))); };
+const comb = (n,k)=>{ if(k<0||k>n) return 0; k=Math.min(k,n-k); let r=1; for(let i=1;i<=k;i++) r=r*(n-k+i)/i; return r; };
+function toast(msg, kind="ok"){ const box=$("#toast"); if(!box) return; box.innerHTML = `<span class="${kind==='bad'?'bad':(kind==='warn'?'warn':'ok')}">${msg}</span>`; if(kind==="ok") setTimeout(()=>box.textContent="", 2500); }
+function erf(x){ // Abramowitz-Stegun approximation
+  const sign = x<0?-1:1; x=Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t=1/(1+p*x); const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign*y;
+}
+function chi2cdf(x,k){ // for k=1 or 2 simplified
+  if(k===1) return erf(Math.sqrt(x/2));
+  // lower incomplete gamma not implemented -> rough series for small k
+  // fallback: Wilson-Hilferty approx
+  const z = (Math.pow(x/k,1/3) - (1 - 2/(9*k))) / Math.sqrt(2/(9*k));
+  // normal CDF approx
+  const cdf = 0.5*(1+erf(z/Math.SQRT2));
+  return Math.min(Math.max(cdf,0),1);
 }
 
-// =============== State ===============
-const LS_KEY = "puri_honumara_v10";
+// ========= state =========
+const LS_KEY = "puri_honumara_v11";
 let state = { draws: [] };
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(raw){ const j = JSON.parse(raw); if(Array.isArray(j.draws)) state.draws = j.draws; }
-  }catch(_){}
-}
-function saveState(){
-  localStorage.setItem(LS_KEY, JSON.stringify(state));
-  $("#statAll").textContent = state.draws.length;
-  $("#statCnt").textContent = state.draws.length;
-}
-
+function loadState(){ try{ const raw=localStorage.getItem(LS_KEY); if(raw){ const j=JSON.parse(raw); if(Array.isArray(j.draws)) state.draws=j.draws; } }catch(_){ } }
+function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); $("#statAll").textContent = state.draws.length; $("#statCnt").textContent = state.draws.length; }
 loadState();
 
-// =============== Supabase (opsiyonel) ===============
+// ========= Supabase (opsiyonel) =========
 const SUPABASE_URL  = "https://lnxzfolvnqrffsodedbu.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxueHpmb2x2bnFyZmZzb2RlZGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMDAzMjYsImV4cCI6MjA3MTc3NjMyNn0.Xasa3ktjfwA2k2BKlMdMgtm0RVt38kUn_7IwgoYhtTI";
-let sb = null;
-let CLOUD = false;
-
+let sb=null, CLOUD=false;
 $("#cloudToggle").addEventListener("change", async (e)=>{
   CLOUD = e.target.checked;
   if(CLOUD){
@@ -263,258 +344,153 @@ $("#cloudToggle").addEventListener("change", async (e)=>{
       const { data, error } = await sb.from("honumara_draws").select("*").order("ts",{ascending:true}).limit(5000);
       if(error) throw error;
       if(Array.isArray(data) && data.length){
-        const seen = new Set(state.draws.map(x=>JSON.stringify(x.numbers)));
-        for(const r of data){
-          const nums = Array.isArray(r.numbers) ? r.numbers : [];
-          const key = JSON.stringify(nums);
-          if(nums.length && !seen.has(key)){
-            state.draws.push({ts:r.ts, numbers:uniqSorted(nums)});
-          }
+        const seen=new Set(state.draws.map(x=>JSON.stringify(x.numbers)));
+        for(const r of data){ const nums=Array.isArray(r.numbers)?r.numbers:[]; const key=JSON.stringify(nums);
+          if(nums.length && !seen.has(key)) state.draws.push({ts:r.ts, numbers:uniqSorted(nums)});
         }
         saveState(); rebuildAll();
       }
       toast("Cloud bağlandı ve senkronize edildi ✅","ok");
-    }catch(err){
-      toast("Cloud hatası: "+err.message,"bad");
-      $("#cloudToggle").checked = false; CLOUD=false;
-    }
-  }else{
-    toast("Cloud kapandı (yerel mod).","warn");
-  }
+    }catch(err){ toast("Cloud hatası: "+err.message,"bad"); $("#cloudToggle").checked=false; CLOUD=false; }
+  }else{ toast("Cloud kapandı (yerel mod).","warn"); }
 });
 
-// =============== Model ===============
+// ========= model (momentum + adaptif bias) =========
 const model = {
-  winN: 50,
-  decay: 0.988,
-  score: new Array(81).fill(0),
-  top: [], bottom: []
+  winN:50, decay:0.988,
+  score:new Array(81).fill(0),
+  biasBoost:new Array(81).fill(0),
+  top:[], bottom:[]
 };
 
 function buildModel(){
-  const N = state.draws.length;
-  const W = Math.max(20, Math.min(200, model.winN));
-  const start = Math.max(0, N - W);
-  const freq = new Array(81).fill(0);
-  const rec = new Array(81).fill(0);
-  const streak = new Array(81).fill(0);
-  const neighbor = new Array(81).fill(0);
+  const N=state.draws.length, W=Math.max(20,Math.min(200,model.winN)), start=Math.max(0,N-W);
+  const freq=new Array(81).fill(0), rec=new Array(81).fill(0), streak=new Array(81).fill(0), neighbor=new Array(81).fill(0);
+  for(let i=start;i<N;i++){ const d=state.draws[i]; const w=Math.pow(model.decay, N-1-i); d.numbers.forEach(n=>{freq[n]++; rec[n]+=w;}); }
+  const last8=state.draws.slice(-8);
+  for(const d of last8){ for(let n=1;n<=80;n++){ if(d.numbers.includes(n)) streak[n]+=1; else streak[n]=Math.max(0,streak[n]-0.3);} }
+  const last3=state.draws.slice(-3);
+  for(const d of last3){ d.numbers.forEach(n=>{ if(n>1) neighbor[n-1]+=0.4; if(n<80) neighbor[n+1]+=0.4; }); }
 
-  for(let i=start;i<N;i++){
-    const d = state.draws[i]; const w = Math.pow(model.decay, N-1-i);
-    d.numbers.forEach(n=>{ freq[n]++; rec[n]+=w; });
-  }
-
-  const last8 = state.draws.slice(-8);
-  for(const d of last8){
-    for(let n=1;n<=80;n++){
-      if(d.numbers.includes(n)) streak[n]+=1; else streak[n]=Math.max(0,streak[n]-0.3);
-    }
-  }
-
-  const last3 = state.draws.slice(-3);
-  for(const d of last3){
-    d.numbers.forEach(n=>{
-      if(n>1) neighbor[n-1]+=0.4;
-      if(n<80) neighbor[n+1]+=0.4;
-    });
-  }
-
-  const last12 = state.draws.slice(-12);
-  const tmp = new Array(81).fill(0);
+  const last12=state.draws.slice(-12), tmp=new Array(81).fill(0);
   for(const d of last12){ d.numbers.forEach(n=>tmp[n]++); }
-  const hotPenalty = new Array(81).fill(0);
-  for(let n=1;n<=80;n++){
-    if(tmp[n]>=6) hotPenalty[n]=1.2; else if(tmp[n]>=4) hotPenalty[n]=0.6;
-  }
+  const hotPenalty=new Array(81).fill(0);
+  for(let n=1;n<=80;n++){ if(tmp[n]>=6) hotPenalty[n]=1.2; else if(tmp[n]>=4) hotPenalty[n]=0.6; }
 
   for(let n=1;n<=80;n++){
-    model.score[n] = 1.0*freq[n] + 1.8*rec[n] + 0.6*streak[n] + 0.5*neighbor[n] - 0.9*hotPenalty[n];
+    model.score[n] = 1.0*freq[n] + 1.8*rec[n] + 0.6*streak[n] + 0.5*neighbor[n] - 0.9*hotPenalty[n] + 0.8*model.biasBoost[n];
   }
-  const last = state.draws[state.draws.length-1];
-  if(last) last.numbers.forEach(n=>model.score[n]-=0.8);
+  const last=state.draws[state.draws.length-1]; if(last) last.numbers.forEach(n=>model.score[n]-=0.8);
 
-  const all = Array.from({length:80},(_,i)=>i+1);
+  const all=Array.from({length:80},(_,i)=>i+1);
   model.top = all.slice().sort((a,b)=>model.score[b]-model.score[a]);
   model.bottom = all.slice().sort((a,b)=>model.score[a]-model.score[b]);
 
-  // UI özet
   $("#statHot").textContent = model.top.slice(0,5).join(", ");
   $("#statCold").textContent = model.bottom.slice(0,3).join(", ");
-  renderHot();
-  renderMomentumTop();
+  renderHot(); renderMomentumTop();
 }
 
+// ========= görüntüler =========
 function renderHot(){
-  const box = $("#hotNow"); box.innerHTML="";
+  const box=$("#hotNow"); if(!box) return; box.innerHTML="";
   model.top.slice(0,12).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num hot">${n} 🔥</span>`));
   model.bottom.slice(0,6).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num cold">${n} ❄️</span>`));
 }
-
 function renderHistory(){
-  const box = $("#history");
-  const last = state.draws.slice(-12).reverse();
-  if(!last.length){ box.innerHTML = `<div class="muted">Henüz kayıt yok.</div>`; return; }
-  box.innerHTML = last.map(d=>{
-    const line = d.numbers.map(n=>`<span class="num">${n}</span>`).join("");
-    return `<div class="row" style="margin:6px 0"><span class="tag">${new Date(d.ts).toLocaleString()}</span>${line}</div>`;
-  }).join("");
-  $("#statCnt").textContent = state.draws.length;
+  const box=$("#history"); const last=state.draws.slice(-12).reverse();
+  if(!last.length){ box.innerHTML=`<div class="muted">Henüz kayıt yok.</div>`; return; }
+  box.innerHTML = last.map(d=>`<div class="row" style="margin:6px 0"><span class="tag">${new Date(d.ts).toLocaleString()}</span>${d.numbers.map(n=>`<span class="num">${n}</span>`).join("")}</div>`).join("");
+  $("#statCnt").textContent=state.draws.length;
 }
+function renderMomentumTop(){ const box=$("#momTop"); if(!box) return; box.innerHTML=""; model.top.slice(0,24).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num">${n}</span>`)); }
 
-function renderMomentumTop(){
-  const box = $("#momTop"); if(!box) return; box.innerHTML="";
-  model.top.slice(0,24).forEach(n=>box.insertAdjacentHTML("beforeend",`<span class="num">${n}</span>`));
-}
-
-// =============== Girdi & Kayıt ===============
-function parseNums(raw){
-  return raw.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>n>=1 && n<=80);
-}
+// ========= input & kayıt =========
+function parseNums(raw){ return raw.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>n>=1&&n<=80); }
 async function addDraw(nums){
-  const clean = uniqSorted(nums);
-  if(!clean.length) throw new Error("Geçerli sayı yok.");
-  state.draws.push({ts:new Date().toISOString(), numbers:clean});
-  saveState();
-  // Cloud opsiyonel
-  if(CLOUD && sb){
-    try{
-      const {error} = await sb.from("honumara_draws").insert({ts:new Date().toISOString(), numbers:clean});
-      if(error) console.warn("Cloud yazılamadı:", error.message);
-    }catch(e){ console.warn("Cloud kapalı:", e.message); }
-  }
+  const clean=uniqSorted(nums); if(!clean.length) throw new Error("Geçerli sayı yok.");
+  state.draws.push({ts:new Date().toISOString(), numbers:clean}); saveState();
+  if(CLOUD && sb){ try{ const {error}=await sb.from("honumara_draws").insert({ts:new Date().toISOString(), numbers:clean}); if(error) console.warn("Cloud yazılamadı:", error.message); }catch(e){} }
 }
 
-// =============== Üretim Motoru ===============
+// ========= üretim motoru =========
 function passesConstraints(nums){
-  const A = uniqSorted(nums); if(A.length!==10) return false;
-  const last = state.draws[state.draws.length-1]?.numbers || [];
-  const prev = state.draws[state.draws.length-2]?.numbers || [];
-
-  // parite
-  const ev = A.filter(x=>x%2===0).length; if(ev<3 || ev>7) return false;
-  // alt-üst (1-40 / 41-80)
-  const low = A.filter(x=>x<=40).length; if(low<3 || low>7) return false;
-  // son çekilişle tekrar sınırı
-  const rep1 = A.filter(x=>last.includes(x)).length; if(rep1>4) return false;
-  // iki çekiliş köprü toplam tekrar
-  const rep2 = A.filter(x=>prev.includes(x)).length; if(rep1+rep2>7) return false;
-  // arka arkaya farkı 1 olan ikili sayısı
+  const A=uniqSorted(nums); if(A.length!==10) return false;
+  const last=state.draws[state.draws.length-1]?.numbers||[], prev=state.draws[state.draws.length-2]?.numbers||[];
+  const ev=A.filter(x=>x%2===0).length; if(ev<3||ev>7) return false;
+  const low=A.filter(x=>x<=40).length; if(low<3||low>7) return false;
+  const rep1=A.filter(x=>last.includes(x)).length; if(rep1>4) return false;
+  const rep2=A.filter(x=>prev.includes(x)).length; if(rep1+rep2>7) return false;
   let adj=0; for(let i=1;i<A.length;i++) if(A[i]-A[i-1]===1) adj++; if(adj>3) return false;
-  // 10'luk dilimler: min 6 dilim
-  const bins = new Set(A.map(x=>Math.floor((x-1)/8))); if(bins.size<6) return false;
+  const bins=new Set(A.map(x=>Math.floor((x-1)/8))); if(bins.size<6) return false;
   return true;
 }
-
-function makeTicket(lock=3, attemptCap=80){
-  const last = state.draws[state.draws.length-1]?.numbers || [];
-  const seeds = model.top.filter(n=>!last.includes(n)).slice(0,10); // sıcak tohum havuzu
-  const chosen = new Set();
-
-  // 1) kilit
+let EXPLORE=false; // anomali varsa keşif modu
+function makeTicket(lock=3,attemptCap=100){
+  const last=state.draws[state.draws.length-1]?.numbers||[];
+  const seeds = (EXPLORE ? model.top.slice(2,14) : model.top.slice(0,10)).filter(n=>!last.includes(n));
+  const chosen=new Set();
   for(let i=0;i<lock;i++) chosen.add(seeds[i%seeds.length]);
-
-  // 2) dengeli seç: 10'luk dilimler üzerinde dolaş
-  const bins = [[1,8],[9,16],[17,24],[25,32],[33,40],[41,48],[49,56],[57,64],[65,72],[73,80]];
-  let idx = Math.floor(Math.random()*bins.length);
+  const bins=[[1,8],[9,16],[17,24],[25,32],[33,40],[41,48],[49,56],[57,64],[65,72],[73,80]];
+  let idx=Math.floor(Math.random()*bins.length);
   while(chosen.size<10){
-    const [a,b] = bins[idx];
-    const cand = model.top.filter(n=>n>=a && n<=b && !chosen.has(n));
-    const pick = cand[0] || model.top.find(n=>!chosen.has(n));
+    const [a,b]=bins[idx];
+    const pool = (EXPLORE ? model.top.slice(0,40).concat(model.bottom.slice(0,30)) : model.top)
+      .filter(n=>n>=a&&n<=b&&!chosen.has(n));
+    const pick = pool[0] || model.top.find(n=>!chosen.has(n));
     if(pick) chosen.add(pick);
-    idx = (idx+1)%bins.length;
+    idx=(idx+1)%bins.length;
   }
-
-  // 3) aşırı sıcak ilk 2 varsa birini soğukla değiştir
-  model.top.slice(0,2).forEach(h=>{
-    if(chosen.has(h)){
-      const repl = model.bottom.find(n=>!chosen.has(n) && !last.includes(n));
-      if(repl){ chosen.delete(h); chosen.add(repl); }
-    }
-  });
-
-  // 4) kısıtları sağlamak için küçük mutasyonlar
-  let arr = uniqSorted([...chosen]);
-  let tries=0;
+  model.top.slice(0,2).forEach(h=>{ if(chosen.has(h)){ const repl=model.bottom.find(n=>!chosen.has(n)&&!last.includes(n)); if(repl){ chosen.delete(h); chosen.add(repl);} }});
+  let arr=uniqSorted([...chosen]); let tries=0;
   while(!passesConstraints(arr) && tries<attemptCap){
-    const bad = arr[Math.floor(Math.random()*arr.length)];
-    const repl = model.top.slice(8,40).concat(model.bottom.slice(0,30)).find(n=>!arr.includes(n));
-    if(repl){ arr = uniqSorted(arr.filter(x=>x!==bad).concat([repl])); }
+    const bad=arr[Math.floor(Math.random()*arr.length)];
+    const repl = (EXPLORE? model.bottom.slice(0,40) : model.top.slice(8,40).concat(model.bottom.slice(0,30))).find(n=>!arr.includes(n));
+    if(repl){ arr=uniqSorted(arr.filter(x=>x!==bad).concat([repl])); }
     tries++;
   }
   return arr;
 }
-
 function generateBatch(lock=3,count=5){
-  const out=[];
-  for(let i=0;i<count;i++){
-    out.push({meta:`${lock}’li kilit • ${new Date().toLocaleTimeString()}`, numbers:makeTicket(lock)});
-  }
-  renderTickets(out);
-  return out;
+  const out=[]; for(let i=0;i<count;i++) out.push({meta:`${lock}’li kilit • ${new Date().toLocaleTimeString()}`, numbers:makeTicket(lock)});
+  renderTickets(out); return out;
 }
-
 function renderTickets(tickets){
-  const box = $("#tickets");
-  if(!tickets.length){ box.innerHTML = `<div class="muted">Henüz bilet yok.</div>`; return; }
-  box.innerHTML = tickets.map(t=>{
-    return `<div class="ticket">
-      <div class="tag">${t.meta}</div>
-      <div class="row" style="margin-top:6px">${t.numbers.map(n=>`<span class="num">${n}</span>`).join("")}</div>
-    </div>`;
-  }).join("");
+  const box=$("#tickets"); if(!tickets.length){ box.innerHTML=`<div class="muted">Henüz bilet yok.</div>`; return; }
+  box.innerHTML = tickets.map(t=>`<div class="ticket"><div class="tag">${t.meta}</div><div class="row" style="margin-top:6px">${t.numbers.map(n=>`<span class="num">${n}</span>`).join("")}</div></div>`).join("");
 }
 
-// =============== Çark (2–5’li) ===============
+// ========= çark =========
 function spin(k){
-  const ids=["#w1","#w2","#w3","#w4","#w5"];
-  ids.forEach(sel=>$(sel).classList.remove("spin"));
-  const pick = model.top.filter(n=>n>=1).slice(0,12);
-  const chosen = uniqSorted(pick.slice(0,k));
-  for(let i=0;i<5;i++){
-    const el = $(ids[i]);
-    el.textContent = "–";
-    if(i<k){
-      el.classList.add("spin");
-      let t=0; const iv = setInterval(()=>{
-        el.textContent = String(1+Math.floor(Math.random()*80));
-        if(++t>15){ clearInterval(iv); el.classList.remove("spin"); el.textContent = String(chosen[i]); }
-      },60);
-    }
-  }
+  const ids=["#w1","#w2","#w3","#w4","#w5"]; ids.forEach(sel=>$(sel).classList.remove("spin"));
+  const pick = model.top.slice(0,12); const chosen=uniqSorted(pick.slice(0,k));
+  for(let i=0;i<5;i++){ const el=$(ids[i]); el.textContent="–"; if(i<k){ el.classList.add("spin"); let t=0; const iv=setInterval(()=>{ el.textContent=String(1+Math.floor(Math.random()*80)); if(++t>15){ clearInterval(iv); el.classList.remove("spin"); el.textContent=String(chosen[i]); }},60); } }
 }
-$("#spin2").onclick = ()=>spin(2);
-$("#spin3").onclick = ()=>spin(3);
-$("#spin4").onclick = ()=>spin(4);
-$("#spin5").onclick = ()=>spin(5);
+$("#spin2").onclick=()=>spin(2); $("#spin3").onclick=()=>spin(3); $("#spin4").onclick=()=>spin(4); $("#spin5").onclick=()=>spin(5);
 
-// =============== Cluster (2/3/4/5) ===============
-function countCombos(k, win=60){
-  const start = Math.max(0, state.draws.length - win);
-  const map = new Map();
-  for(let i=start;i<state.draws.length;i++){
-    const arr = state.draws[i].numbers;
-    comb(arr,k).forEach(c=>{
-      const key = c.join("-");
-      map.set(key, (map.get(key)||0)+1);
-    });
-  }
-  return [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,40);
+// ========= cluster (lift) =========
+function kProbInDraw(k){ // spesifik k-kombinasyon bir çekilişte görülme olasılığı
+  return comb(80-k,20-k)/comb(80,20);
 }
-function comb(arr,k){
-  const out=[]; (function go(start, buf){ if(buf.length===k){ out.push(buf.slice()); return;}
-    for(let i=start;i<arr.length;i++){ buf.push(arr[i]); go(i+1,buf); buf.pop(); }
-  })(0,[]);
-  return out;
+function countCombos(k, win=60){
+  const start=Math.max(0,state.draws.length-win); const map=new Map();
+  for(let i=start;i<state.draws.length;i++){
+    const arr=state.draws[i].numbers;
+    (function go(s,buf){
+      if(buf.length===k){ const key=buf.join("-"); map.set(key,(map.get(key)||0)+1); return; }
+      for(let j=s;j<arr.length;j++){ buf.push(arr[j]); go(j+1,buf); buf.pop(); }
+    })(0,[]);
+  }
+  const obs=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,60);
+  const exp = kProbInDraw(k) * (state.draws.length - start);
+  return obs.map(([key,c])=>({key,c,lift:(exp>0? c/exp : 0)})).sort((a,b)=>b.lift-a.lift).slice(0,40);
 }
 function renderCluster(k=2){
-  $("#clWin").textContent = "60";
-  const box = $("#clusterBox"); box.innerHTML="";
-  const top = countCombos(k,60);
-  if(!top.length){ box.innerHTML = `<div class="muted">Yeterli veri yok.</div>`; return; }
-  top.forEach(([key,c])=>{
-    const nums = key.split("-").map(n=>`<span class="num">${n}</span>`).join("");
-    box.insertAdjacentHTML("beforeend", `<div class="pill" style="margin:4px">${nums}<span class="tag">×${c}</span></div>`);
+  $("#clWin").textContent="60"; const box=$("#clusterBox"); box.innerHTML="";
+  const rows = countCombos(k,60); if(!rows.length){ box.innerHTML=`<div class="muted">Yeterli veri yok.</div>`; return; }
+  rows.forEach(({key,c,lift})=>{
+    const nums=key.split("-").map(n=>`<span class="num">${n}</span>`).join("");
+    box.insertAdjacentHTML("beforeend", `<div class="pill" style="margin:4px">${nums}<span class="tag">×${c} • lift ${lift.toFixed(2)}</span></div>`);
   });
 }
 $$('#tab-cluster [data-c]').forEach(b=>b.addEventListener("click",e=>{
@@ -522,88 +498,259 @@ $$('#tab-cluster [data-c]').forEach(b=>b.addEventListener("click",e=>{
   renderCluster(parseInt(e.target.dataset.c,10));
 }));
 
-// =============== Sürpriz İndeksi ===============
+// ========= sürpriz =========
 function surprise(){
-  const N = state.draws.length; if(N<30) return [];
-  const sc = model.score.slice();
-  const base = []; for(let n=1;n<=80;n++) base.push([n, Math.max(0,sc[n])]); 
-  const tot = sum(base.map(x=>x[1])) || 1;
-  const p = new Map(base.map(([n,s])=>[n, s/tot]));
-  const last = state.draws[N-1].numbers;
-  const obs = new Map(Array.from({length:80},(_,i)=>[i+1,0]));
-  last.forEach(n=>obs.set(n,1));
-  const rows = []; for(let n=1;n<=80;n++){ rows.push([n, (obs.get(n)-p.get(n))]); }
-  rows.sort((a,b)=>Math.abs(b[1]) - Math.abs(a[1]));
-  return rows.slice(0,20);
+  const N=state.draws.length; if(N<30) return [];
+  const sc=model.score.slice(); const base=[]; for(let n=1;n<=80;n++) base.push([n,Math.max(0,sc[n])]);
+  const tot=sum(base.map(x=>x[1]))||1; const p=new Map(base.map(([n,s])=>[n,s/tot]));
+  const last=state.draws[N-1].numbers; const obs=new Map(Array.from({length:80},(_,i)=>[i+1,0])); last.forEach(n=>obs.set(n,1));
+  const rows=[]; for(let n=1;n<=80;n++) rows.push([n,(obs.get(n)-p.get(n))]);
+  rows.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])); return rows.slice(0,20);
 }
 function renderSurprise(){
-  const box = $("#surpriseBox"); box.innerHTML="";
-  const rows = surprise();
-  if(!rows.length){ box.innerHTML = `<div class="muted">Yeterli veri yok (≥30 kayıt gerekli).</div>`; return; }
-  rows.forEach(([n,z])=>{
-    const cls = z>0? "hot" : "cold";
-    box.insertAdjacentHTML("beforeend", `<span class="num ${cls}" title="${(z>0?'+':'')+z.toFixed(3)}">${n}</span>`);
-  });
+  const box=$("#surpriseBox"); box.innerHTML="";
+  const rows=surprise(); if(!rows.length){ box.innerHTML=`<div class="muted">Yeterli veri yok (≥30 kayıt gerekli).</div>`; return; }
+  rows.forEach(([n,z])=>{ const cls=z>0?"hot":"cold"; box.insertAdjacentHTML("beforeend",`<span class="num ${cls}" title="${(z>0?'+':'')+z.toFixed(3)}">${n}</span>`); });
 }
 
-// =============== UI Bağlantıları ===============
-$("#btnSave").onclick = async ()=>{
+// ========= Bias Lab =========
+function windowDraws(W){ const N=state.draws.length; const s=Math.max(0,N-W); return state.draws.slice(s); }
+function presenceCounts(W){ const c=new Array(81).fill(0); for(const d of windowDraws(W)) d.numbers.forEach(n=>c[n]++); return c; }
+function chiSquareHeat(W){
+  const Ds=windowDraws(W); const exp=W*0.25; const freq=presenceCounts(W);
+  const grid=$("#chiGrid"); grid.innerHTML="";
+  const flags={pos:[],neg:[]};
+  for(let n=1;n<=80;n++){
+    const o=freq[n]; const chi = (o-exp)*(o-exp)/(exp||1e-9);
+    const p=1-chi2cdf(chi,1); // p-value
+    let cls=""; if(p<0.01) cls = (o>exp?"hot":"cold");
+    grid.insertAdjacentHTML("beforeend", `<div class="cell ${cls}" title="n=${n} • obs=${o} exp=${exp.toFixed(1)} p=${p.toExponential(2)}">${n}</div>`);
+    if(p<0.01){ if(o>exp) flags.pos.push(n); else flags.neg.push(n); }
+  }
+  return flags;
+}
+function runsTestBinary(seq){
+  // Wald–Wolfowitz runs test
+  const n1=seq.filter(x=>x===1).length, n2=seq.length-n1; if(n1===0||n2===0) return {R:1,z:0,p:1};
+  let R=1; for(let i=1;i<seq.length;i++) if(seq[i]!==seq[i-1]) R++;
+  const mu = 1 + (2*n1*n2)/(n1+n2);
+  const sigma = Math.sqrt((2*n1*n2*(2*n1*n2 - n1 - n2))/(((n1+n2)**2)*(n1+n2-1)));
+  const z = (R - mu)/sigma; const p = 2*(1- (0.5*(1+erf(Math.abs(z)/Math.SQRT2)) ));
+  return {R,mu,sigma,z,p};
+}
+function runsPanel(W){
+  const Ds=windowDraws(W);
+  const lowHigh = Ds.map(d=> (d.numbers.filter(x=>x<=40).length>10?1:0));
+  const oddEven = Ds.map(d=> (d.numbers.filter(x=>x%2===1).length>10?1:0));
+  const r1=runsTestBinary(lowHigh), r2=runsTestBinary(oddEven);
+  $("#runsOut").innerHTML = `
+    <span class="pill">Alt-Üst runs: R=${r1.R} z=${r1.z.toFixed(2)} p=${r1.p.toFixed(3)}</span>
+    <span class="pill">Tek-Çift runs: R=${r2.R} z=${r2.z.toFixed(2)} p=${r2.p.toFixed(3)}</span>
+  `;
+  return {r1,r2};
+}
+function modTests(W){
+  const Ds=windowDraws(W);
+  const lastDigit=new Array(10).fill(0); const mod8=new Array(8).fill(0);
+  for(const d of Ds) for(const n of d.numbers){ lastDigit[n%10]++; mod8[(n-1)%8]++; }
+  function chiArr(arr){ const E=sum(arr)/arr.length; const chi=sum(arr.map(o=> (o-E)*(o-E)/(E||1e-9))); const p=1-chi2cdf(chi,arr.length-1); return {chi,p}; }
+  const a=chiArr(lastDigit), b=chiArr(mod8);
+  $("#modOut").innerHTML = `
+    <span class="pill">Son basamak χ²=${a.chi.toFixed(1)} p=${a.p.toFixed(3)}</span>
+    <span class="pill">Mod-8 χ²=${b.chi.toFixed(1)} p=${b.p.toFixed(3)}</span>
+  `;
+  return {a,b};
+}
+function sumLagOverlap(W){
+  const Ds=windowDraws(W);
+  const sums=Ds.map(d=>sum(d.numbers));
+  const EX=810, varSum = 20*((80*80-1)/12)*(60/79); const sdev=Math.sqrt(varSum); // ≈90
+  const z = (mean(sums)-EX)/(sdev/Math.sqrt(Math.max(1,sums.length)));
+  // Lag correlations on sums
+  function corr(x,y){ const mx=mean(x), my=mean(y); let num=0,dx=0,dy=0; for(let i=0;i<Math.min(x.length,y.length);i++){ const a=x[i]-mx, b=y[i]-my; num+=a*b; dx+=a*a; dy+=b*b; } return num/Math.sqrt((dx||1)*(dy||1)); }
+  const s1=sums.slice(0,-1), s2=sums.slice(1); const lag1=corr(s1,s2);
+  const s3=sums.slice(0,-2), s4=sums.slice(2); const lag2=corr(s3,s4);
+  // Overlap (expected ≈5)
+  let ov=[]; for(let i=1;i<Ds.length;i++){ const a=Ds[i-1].numbers, b=Ds[i].numbers; ov.push(a.filter(x=>b.includes(x)).length); }
+  const ovMean=mean(ov)||0, ovZ=(ovMean-5)/Math.sqrt(4.6875/Math.max(1,ov.length));
+  $("#otherStats").innerHTML = `
+    <span class="pill">Sum-Z: z=${z.toFixed(2)}</span>
+    <span class="pill">Lag-1 ρ=${lag1.toFixed(2)}</span>
+    <span class="pill">Lag-2 ρ=${lag2.toFixed(2)}</span>
+    <span class="pill">Overlap μ=${ovMean.toFixed(2)} (z=${ovZ.toFixed(2)})</span>
+  `;
+  return {z,lag1,lag2,ovMean,ovZ};
+}
+function bayesShrink(W){
+  const Ds=windowDraws(W); const k=presenceCounts(W);
+  const s=8; const a0=0.25*s, b0=0.75*s; const post=[];
+  for(let n=1;n<=80;n++){
+    const postMean=(a0+k[n])/(a0+b0+Ds.length);
+    const denom=(a0+b0+Ds.length); const pm=postMean; // approx LB via normal
+    const se = Math.sqrt(pm*(1-pm)/Math.max(1,denom));
+    const lb = Math.max(0, pm - 1.96*se);
+    post.push({n,pm,lb});
+  }
+  post.sort((x,y)=>y.lb-x.lb);
+  const box=$("#bayesOut"); box.innerHTML="";
+  post.slice(0,16).forEach(o=>box.insertAdjacentHTML("beforeend",`<span class="num hot" title="pm=${o.pm.toFixed(3)} lb=${o.lb.toFixed(3)}">${o.n}</span>`));
+  return post;
+}
+
+// adaptasyon: 2+ kırmızı bayrak → EXPLORE + biasBoost güncelle
+function applyAdaptation(flags, runs, mods, other, bayesTop){
+  let alerts=0;
+  if(flags.pos.length+flags.neg.length>=6) alerts++;
+  if(runs.r1.p<0.05 || runs.r2.p<0.05) alerts++;
+  if(mods.a.p<0.05 || mods.b.p<0.05) alerts++;
+  if(Math.abs(other.z)>2 || Math.abs(other.ovZ)>2) alerts++;
+
+  // biasBoost reset
+  model.biasBoost.fill(0);
+  // Chi-square düşük taraftakileri hafifçe BOOST, aşırı sıcakları hafif CEZA
+  flags.neg.forEach(n=>{ model.biasBoost[n]+=0.6; });
+  flags.pos.slice(0,8).forEach(n=>{ model.biasBoost[n]-=0.4; });
+  // Bayes alt-band yüksekleri ufak artı
+  bayesTop.slice(0,12).forEach(o=>{ model.biasBoost[o.n]+=0.2; });
+
+  EXPLORE = alerts>=2;
+  const pill=$("#alarmPill");
+  if(EXPLORE){ pill.textContent="🛎️ keşif modu"; pill.style.color="#f59e0b"; }
+  else { pill.textContent="🛎️ normal"; pill.style.color=""; }
+}
+
+// ========= Daypart / Hafta =========
+function daypartBuckets(){
+  const rows = { sabah:[], diger:[], gece:[], haftaic:[], haftasonu:[] };
+  for(const d of state.draws){
+    const dt=new Date(d.ts); const h=dt.getHours(), wd=dt.getDay();
+    if(h>=6 && h<=11) rows.sabah.push(d);
+    else if(h>=0 && h<=5) rows.gece.push(d);
+    else rows.diger.push(d);
+    if(wd>=1 && wd<=5) rows.haftaic.push(d); else rows.haftasonu.push(d);
+  }
+  return rows;
+}
+function topDiff(setA,setB){
+  const cA=new Array(81).fill(0), cB=new Array(81).fill(0);
+  setA.forEach(d=>d.numbers.forEach(n=>cA[n]++)); setB.forEach(d=>d.numbers.forEach(n=>cB[n]++));
+  const diff=[]; for(let n=1;n<=80;n++) diff.push({n, d:(cA[n]-cB[n])});
+  diff.sort((x,y)=>Math.abs(y.d)-Math.abs(x.d)); return diff.slice(0,12);
+}
+function renderDaypart(){
+  const {sabah,diger,gece,haftaic,haftasonu}=daypartBuckets();
+  const box=$("#daypartOut"); box.innerHTML="";
+  function row(title, A,B){
+    const dif = topDiff(A,B);
+    box.insertAdjacentHTML("beforeend", `<div style="margin:6px 0" class="muted">${title}</div>`);
+    const line = dif.map(o=>`<span class="num ${o.d>0?'hot':'cold'}" title="Δ=${o.d}">${o.n}</span>`).join("");
+    box.insertAdjacentHTML("beforeend", `<div class="row">${line}</div>`);
+  }
+  if(sabah.length && diger.length) row("Sabah vs Diğer", sabah, diger);
+  if(gece.length && diger.length) row("Gece vs Diğer", gece, diger);
+  if(haftaic.length && haftasonu.length) row("Hafta içi vs Hafta sonu", haftaic, haftasonu);
+}
+
+// ========= EV & ödeme =========
+function hyperProbHit(N=80,K=20,n=10,x){ // X~Hypergeom; prob of exactly x hits
+  return (comb(K,x)*comb(N-K,n-x))/comb(N,n);
+}
+function evForTicketSize(k, pay){ // pay: { "2":5, ... }
+  let EV=0; for(const h in pay){ const x=parseInt(h,10); if(x>=0) EV += hyperProbHit(80,20,k,x) * pay[h]; }
+  return EV;
+}
+function renderEV(){
+  const k=parseInt($("#evK").value,10)||10; let pay={};
+  try{ pay=JSON.parse($("#evPay").value||"{}"); }catch(e){ toast("Ödeme JSON hatalı","bad"); return; }
+  const ev=evForTicketSize(k, pay);
+  $("#evOut").innerHTML = `<div class="pill">K=${k} için EV ≈ <b>${ev.toFixed(2)}</b> (birim başına)</div>`;
+}
+
+// ========= A/B testi (online backtest, küçük B) =========
+function backtest(B=20){
+  const N=state.draws.length; if(N< B+5) return {msg:"Yeterli kayıt yok.",A:0,B:0};
+  let winA=0, winB=0, games=0;
+  for(let t=N-B; t<N; t++){
+    // geçici model rebuild: t-1'e kadar
+    const snap = state.draws; state.draws = state.draws.slice(0,t);
+    model.biasBoost.fill(0); EXPLORE=false; buildModel();
+    const A=generateBatch(3,5).map(o=>o.numbers);
+    EXPLORE=true; const Bset=generateBatch(3,5).map(o=>o.numbers);
+    // skorla
+    const draw = snap[t].numbers;
+    function scorePort(port){ return port.reduce((acc,b)=> acc + Math.max(...b.map(n=> draw.includes(n)?1:0)), 0); } // kaba: toplam kapsama sinyali
+    winA += A.reduce((acc,b)=> acc + b.filter(n=>draw.includes(n)).length, 0);
+    winB += Bset.reduce((acc,b)=> acc + b.filter(n=>draw.includes(n)).length, 0);
+    // restore
+    state.draws = snap;
+    buildModel();
+    games++;
+  }
+  return {A:winA,B:winB,games};
+}
+
+// ========= Bias Lab bağla =========
+function runBias(){
+  const W=parseInt($("#biasW").value,10)||80;
+  const flags=chiSquareHeat(W);
+  const runs=runsPanel(W);
+  const mods=modTests(W);
+  const other=sumLagOverlap(W);
+  const bayesTop=bayesShrink(W);
+  applyAdaptation(flags,runs,mods,other,bayesTop);
+  $("#biasSummary").textContent = `χ² flags: +${flags.pos.length}/−${flags.neg.length} • runs p=${Math.min(runs.r1.p,runs.r2.p).toFixed(3)} • mod p=${Math.min(mods.a.p,mods.b.p).toFixed(3)} • sumZ=${other.z.toFixed(2)} • overlapZ=${other.ovZ.toFixed(2)} • ${EXPLORE?'KEŞİF':'NORMAL'}`;
+}
+$("#btnBiasRun").onclick=()=>{ runBias(); buildModel(); };
+
+// ========= EV / AB bağla =========
+$("#btnEV").onclick=renderEV;
+$("#btnAB").onclick=()=>{
+  const B=parseInt($("#abB").value,10)||20;
+  const r=backtest(B);
+  $("#abOut").innerHTML = r.msg ? `<div class="muted">${r.msg}</div>` :
+    `<div class="pill">B=${r.games}: A toplam isabet=${r.A} • B (keşif) toplam isabet=${r.B} → <b>${r.A>r.B?'A önde':'B önde'}</b></div>`;
+};
+
+// ========= UI bağla =========
+$("#btnSave").onclick=async ()=>{
   try{
-    const raw = $("#drawInput").value.trim(); if(!raw) return toast("Sayı gir.","bad");
-    const nums = parseNums(raw);
-    if(nums.length<6) return toast("En az 6 sayı gir.","bad");
-    await addDraw(nums);
-    $("#drawInput").value = "";
+    const raw=$("#drawInput").value.trim(); if(!raw) return toast("Sayı gir.","bad");
+    const nums=parseNums(raw); if(nums.length<6) return toast("En az 6 sayı gir.","bad");
+    await addDraw(nums); $("#drawInput").value="";
     toast("Kaydedildi ve bilet üretildi ✅","ok");
     buildModel(); renderHistory(); generateBatch(3,5);
   }catch(e){ toast("Hata: "+e.message,"bad"); }
 };
-$("#btn2").onclick = ()=>generateBatch(2,5);
-$("#btn3").onclick = ()=>generateBatch(3,5);
-$("#btn4").onclick = ()=>generateBatch(4,5);
-$("#btn5").onclick = ()=>generateBatch(5,5);
+$("#btn2").onclick=()=>generateBatch(2,5);
+$("#btn3").onclick=()=>generateBatch(3,5);
+$("#btn4").onclick=()=>generateBatch(4,5);
+$("#btn5").onclick=()=>generateBatch(5,5);
 
-// momentum ayarları
-$("#rebuild").onclick = ()=>{ 
-  model.winN = parseInt($("#winN").value,10)||50;
-  model.decay = parseFloat($("#decay").value)||0.988;
-  buildModel(); toast("Model güncellendi.","ok");
-};
+// momentum
+$("#rebuild").onclick=()=>{ model.winN=parseInt($("#winN").value,10)||50; model.decay=parseFloat($("#decay").value)||0.988; buildModel(); toast("Model güncellendi.","ok"); };
 
-// export / import
-$("#btnExport").onclick = ()=>{
-  const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download="honumara_state.json"; a.click();
-};
-$("#btnImport").onclick = ()=>$("#importFile").click();
+// export/import
+$("#btnExport").onclick=()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="honumara_state.json"; a.click(); };
+$("#btnImport").onclick=()=>$("#importFile").click();
 $("#importFile").addEventListener("change", e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ()=>{
-    try{
-      const j = JSON.parse(r.result); if(Array.isArray(j.draws)){ state.draws=j.draws; saveState(); rebuildAll(); toast("İçe aktarıldı.","ok"); }
-      else toast("Geçersiz dosya.","bad");
-    }catch(err){ toast("Hata: "+err.message,"bad"); }
-  }; r.readAsText(f);
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const j=JSON.parse(r.result); if(Array.isArray(j.draws)){ state.draws=j.draws; saveState(); rebuildAll(); toast("İçe aktarıldı.","ok"); } else toast("Geçersiz dosya.","bad"); }catch(err){ toast("Hata: "+err.message,"bad"); } }; r.readAsText(f);
 });
 
-// tab gezinme + drawer
+// tabs + drawer
 $$("nav .nav button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     $$("nav .nav button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
-    const tab = btn.dataset.tab;
-    $$("main > section.wrap").forEach(s=>s.hidden = (s.id !== "tab-"+tab));
+    const tab=btn.dataset.tab; $$("main > section.wrap").forEach(s=>s.hidden=(s.id!=="tab-"+tab));
     if(window.innerWidth<980) $("#drawer").classList.remove("open");
     if(tab==="cluster") renderCluster(2);
     if(tab==="surprise") renderSurprise();
+    if(tab==="daypart") renderDaypart();
   });
 });
-$("#btnBurger").onclick = ()=> $("#drawer").classList.toggle("open");
+$("#btnBurger").onclick=()=> $("#drawer").classList.toggle("open");
 
-// =============== İlk yükleme ===============
-function rebuildAll(){
-  saveState(); renderHistory(); buildModel(); renderSurprise();
-  renderCluster(2); renderMomentumTop();
-}
+// ========= ilk yükleme =========
+function rebuildAll(){ saveState(); renderHistory(); buildModel(); renderSurprise(); renderCluster(2); renderMomentumTop(); }
 rebuildAll();
 
 // PWA SW
